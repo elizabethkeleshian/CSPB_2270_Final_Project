@@ -1,0 +1,77 @@
+Objective
+Create an interactive 2D scene editor that demonstrates scene graph data structures in action. The editor will allow users to create basic shapes, organize them hierarchically, and manipulate them while observing how parent-child relationships affect transformations between objects.
+
+Background
+Scene graphs provide the backbone of many graphics applications, including game engines, graphic design software, and editors like Maya, Motion Builder, and Avid. Their hierarchical approach to organizing graphical elements mirrors how people naturally think about objects and their relationships in the physical space.
+
+For instance, when a car moves in a scene, its wheels should rotate. Scene graphs establish parent-child relationships between objects. In this case, the car is the parent node, and the wheels are its children. If a user turns the car node, wheels automatically turn on with the parent. 
+
+Proposed Solution
+Overview
+The implementation will include a 2D scene editor application that allows users to:
+
+Create basic shapes (rectangles and circles)
+Select and transform shapes using intuitive controls
+Group objects to establish parent-child relationships
+Observe how transformations propagate through the hierarchy
+Primary Data Structure: Tree
+This project implements the scene graph using a tree data structure. Each node in the tree represents a graphical object with properties for transformation (position, rotation, scale), visual attributes (shape type, color), and relationships (parent and children).
+
+Trees are ideal for this application because they:
+
+Naturally represent containment and hierarchical relationships
+Allow efficient propagation of transformations from parents to children
+Enable recursive operations like rendering and hit testing
+Provide O(log n) access time for finding objects
+Support intuitive organization of graphical elements
+Scene graphs are advantageous over data structures such as arrays or linked lists because they require manual tracking of object relationships and complex transformation calculations, significantly increasing code complexity and computational overhead. Graphs would be too general, potentially allowing cycles that do not make logical sense for parent-child relationships in a scene.
+
+Implementation Components
+Scene Node Class
+Contains transformation properties, parent reference, and child collection.
+Implements methods for tree traversal and transformation propagation
+Handles local-to-global coordinate conversions
+Transformation System
+Implements basic matrix operations for combining transformations
+Propagates changes through the hierarchy.
+Provides utility functions for common operations (translate, rotate, scale)
+Interactive Interface
+A canvas for direct visualization and manipulation
+Tree view showing the hierarchical structure
+Tools for creating, selecting, and transforming objects
+Challenges
+Transformation Mathematics
+Implementing the matrix operations 
+Ensuring correct propagation through the hierarchy
+Converting between local and global coordinate spaces
+Strategy: Start with simple transformations and gradually add complexity; use existing libraries for matrix math if necessary
+Selection and Interaction
+Detecting which object was clicked when objects overlap
+Managing the selection of both individual objects and groups
+Creating intuitive controls for transformations
+Strategy: Implement depth-first traversal for hit testing; use visual feedback for selection state
+Performance Considerations
+Efficiently updating transformations when objects move.
+Optimizing tree traversal for operations like rendering
+Strategy: Use dirty flags to avoid unnecessary recalculations; implement render culling for efficiency
+Expected Outcomes
+The completed project will demonstrate:
+
+A working scene graph implementation managing parent-child relationships
+Visual feedback showing how transformations affect hierarchies of objects
+The ability to organize objects into logical groups
+How tree traversal can efficiently apply operations to multiple objects
+It will also include:
+
+Implementation of the scene graph data structure
+Interactive editor application with basic shape-creation tools
+Transformation tools (move, rotate, scale) that properly handle hierarchies
+Grouping/ungrouping functionality demonstrating parent-child relationships
+Tree view visualization synchronized with the canvas view
+Source code with extensive comments explaining the implementation
+Documentation explaining design decisions and implementation challenges
+References
+Cormen, T. H., Leiserson, C. E., Rivest, R. L., & Stein, C. (2009). Introduction to Algorithms (3rd ed.). MIT Press.
+Sedgewick, R., & Wayne, K. (2011). Algorithms (4th ed.). Addison-Wesley Professional.
+Real-Time Rendering (4th Edition) by Akenine-Möller, Haines, and Hoffman
+OpenGL documentation 
