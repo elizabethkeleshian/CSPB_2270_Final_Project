@@ -1,4 +1,4 @@
-.PHONY: all clean build test
+.PHONY: all clean build test docs
 
 # Default target
 all: build
@@ -12,6 +12,10 @@ build:
 # Run tests
 test: build
 	cd build && ctest --output-on-failure
+
+# Generate documentation
+docs:
+	doxygen Doxyfile
 
 # Clean build files
 clean:

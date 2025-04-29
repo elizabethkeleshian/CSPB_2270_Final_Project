@@ -20,7 +20,7 @@ using glm::translate;
 using glm::rotate;
 using glm::scale;
 using glm::radians;
-
+using glm::degrees;
 } // namespace scene_graph
 
 #endif // SCENE_GRAPH_TYPES_H
