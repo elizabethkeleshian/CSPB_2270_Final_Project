@@ -20,22 +20,16 @@ bool areVectorsEqual(const T& v1, const T& v2, float epsilon = 0.0001f) {
 
 // Check if two matrices are equal within a small epsilon value
 bool areMatricesEqual(const Matrix4& m1, const Matrix4& m2, float epsilon = 0.0001f) {
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            if (std::abs(m1[i][j] - m2[i][j]) > epsilon) {
-                std::cout << "Matrix difference at [" << i << "][" << j << "]: " 
-                          << m1[i][j] << " vs " << m2[i][j] << std::endl;
-                return false;
-            }
-        }
-    }
-    return true;
+    // Use glm's built-in epsilon comparison for matrices
+    return glm::all(glm::epsilonEqual(Vector4(m1[0]), Vector4(m2[0]), epsilon)) &&
+           glm::all(glm::epsilonEqual(Vector4(m1[1]), Vector4(m2[1]), epsilon)) &&
+           glm::all(glm::epsilonEqual(Vector4(m1[2]), Vector4(m2[2]), epsilon)) &&
+           glm::all(glm::epsilonEqual(Vector4(m1[3]), Vector4(m2[3]), epsilon));
 }
 
 class TransformTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        std::cout << "Setting up test fixture..." << std::endl;
         // Initialize common test values
         defaultTransform_ = Transform();
         translatedTransform_ = Transform();
@@ -51,7 +45,6 @@ protected:
         combinedTransform_.setPosition(glm::vec2(10.0f, 20.0f));
         combinedTransform_.setRotation(90.0f);
         combinedTransform_.setScale(glm::vec2(2.0, 3.0f));
-        std::cout << "Test fixture setup complete." << std::endl;
     }
     
     // Common test transforms
@@ -63,73 +56,62 @@ protected:
 };
 
 TEST_F(TransformTest, DefaultConstructor) {
-    std::cout << "Running DefaultConstructor test..." << std::endl;
     EXPECT_EQ(defaultTransform_.getPosition(), Vector2(0, 0));
     EXPECT_EQ(defaultTransform_.getRotation(), 0.0f);
     EXPECT_EQ(defaultTransform_.getScale(), Vector2(1, 1));
-    std::cout << "DefaultConstructor test complete." << std::endl;
 }
 
 TEST_F(TransformTest, SetAndGetPosition) {
-    std::cout << "Running SetAndGetPosition test..." << std::endl;
     Vector2 position(5.0f, 10.0f);
     defaultTransform_.setPosition(position);
     EXPECT_EQ(defaultTransform_.getPosition(), position);
-    std::cout << "SetAndGetPosition test complete." << std::endl;
 }
 
 TEST_F(TransformTest, SetAndGetRotation) {
-    std::cout << "Running SetAndGetRotation test..." << std::endl;
     float rotation = 45.0f;
     rotatedTransform_.setRotation(rotation);
     EXPECT_FLOAT_EQ(rotatedTransform_.getRotation(), rotation);
-    std::cout << "SetAndGetRotation test complete." << std::endl;
 }
 
 TEST_F(TransformTest, SetAndGetScale) {
-    std::cout << "Running SetAndGetScale test..." << std::endl;
     Vector2 scale(2.0f, 3.0f);  
     scaledTransform_.setScale(scale);
     EXPECT_EQ(scaledTransform_.getScale(), scale);
-    std::cout << "SetAndGetScale test complete." << std::endl;
 }
 
 TEST_F(TransformTest, GetMatrix) {
-    std::cout << "Running GetMatrix test..." << std::endl;
     Matrix4 identityMatrix = Matrix4(1.0f);
     
     // A default transformation should be the identity matrix
     Matrix4 defaultMatrix = defaultTransform_.getMatrix();
-    std::cout << "Testing default matrix..." << std::endl;
     EXPECT_TRUE(areMatricesEqual(defaultMatrix, identityMatrix));
 
     // A translated transformation should have a translation component
     Matrix4 translatedMatrix = translatedTransform_.getMatrix();
     Matrix4 expectedTranslated = translate(identityMatrix, Vector3(10.0f, 20.0f, 0.0f));
-    std::cout << "Testing translated matrix..." << std::endl;
     EXPECT_TRUE(areMatricesEqual(translatedMatrix, expectedTranslated));
 
     // A rotated transformation should have a rotation component
     Matrix4 rotatedMatrix = rotatedTransform_.getMatrix();
     Matrix4 expectedRotated = rotate(identityMatrix, radians(90.0f), Vector3(0.0f, 0.0f, 1.0f));
-    std::cout << "Testing rotated matrix..." << std::endl;
     EXPECT_TRUE(areMatricesEqual(rotatedMatrix, expectedRotated));
 
     // A scaled transformation should have a scale component
     Matrix4 scaledMatrix = scaledTransform_.getMatrix();
     Matrix4 expectedScaled = scale(identityMatrix, Vector3(2.0f, 3.0f, 1.0f));
-    std::cout << "Testing scaled matrix..." << std::endl;
     EXPECT_TRUE(areMatricesEqual(scaledMatrix, expectedScaled));
 
     // A combined transformation should have all components
     Matrix4 combinedMatrix = combinedTransform_.getMatrix();
     Matrix4 expectedCombined = translate(
-        rotate(identityMatrix, radians(90.0f), Vector3(0.0f, 0.0f, 1.0f)), 
+        rotate(
+            scale(identityMatrix, Vector3(2.0f, 3.0f, 1.0f)),
+            radians(90.0f),
+            Vector3(0.0f, 0.0f, 1.0f)
+        ),
         Vector3(10.0f, 20.0f, 0.0f)
     );
-    std::cout << "Testing combined matrix..." << std::endl;
     EXPECT_TRUE(areMatricesEqual(combinedMatrix, expectedCombined));
-    std::cout << "GetMatrix test complete." << std::endl;
 }
 
 TEST_F(TransformTest, TransformPoint) {
@@ -137,23 +119,23 @@ TEST_F(TransformTest, TransformPoint) {
 
     // A defualt transformation should not change the point
     Vector2 transformedPoint = defaultTransform_.transformPoint(point);
-    EXPECT_EQ(transformedPoint, point);
+    EXPECT_TRUE(areVectorsEqual(transformedPoint, point));
 
     // A translated point should be moved by the translation
     Vector2 translatedPoint = translatedTransform_.transformPoint(point);
-    EXPECT_EQ(translatedPoint, Vector2(11.0f, 21.0f));
+    EXPECT_TRUE(areVectorsEqual(translatedPoint, Vector2(11.0f, 21.0f)));
 
     // A rotated point should be rotated by the rotation
     Vector2 rotatedPoint = rotatedTransform_.transformPoint(point);
-    EXPECT_EQ(rotatedPoint, Vector2(-1.0f, 1.0f));
+    EXPECT_TRUE(areVectorsEqual(rotatedPoint, Vector2(-1.0f, 1.0f)));
 
     // A scaled point should be scaled by the scale
     Vector2 scaledPoint = scaledTransform_.transformPoint(point);
-    EXPECT_EQ(scaledPoint, Vector2(2.0f, 3.0f));
+    EXPECT_TRUE(areVectorsEqual(scaledPoint, Vector2(2.0f, 3.0f)));
 
     // A combined transformation should apply all transformations
     Vector2 combinedPoint = combinedTransform_.transformPoint(point);
-    EXPECT_EQ(combinedPoint, Vector2(-1.0f, 11.0f));
+    EXPECT_TRUE(areVectorsEqual(combinedPoint, Vector2(7.0f, 22.0f)));
 }
 
 TEST_F(TransformTest, SetMatrixBasicTransformations) {

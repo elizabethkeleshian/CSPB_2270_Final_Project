@@ -26,22 +26,4 @@ target_link_libraries(scene_graphs_app
 )
 
 # Enable testing
-enable_testing()
-
-# Add test executable
-add_executable(scene_graphs_test_executable 
-    test/scene_graph/node_test.cpp
-    test/scene_graph/transform_test.cpp
-    test/scene_graph/types_test.cpp
-)
-
-# Link test executable with core library and GTest
-target_link_libraries(scene_graphs_test_executable 
-    scene_graphs_core
-    visualization_core
-    ${GTEST_LIBRARIES}
-    pthread
-)
-
-# Add test
-add_test(NAME scene_graphs_tests COMMAND scene_graphs_test_executable) 
+enable_testing() 

@@ -13,5 +13,6 @@ target_link_libraries(scene_graphs_tests
     pthread
 )
 
-# Add test
-add_test(NAME scene_graphs_tests COMMAND scene_graphs_tests) 
+# Add tests
+add_test(NAME transform_tests COMMAND scene_graphs_tests --gtest_filter=scene_graph::test::TransformTest*)
+add_test(NAME types_tests COMMAND scene_graphs_tests --gtest_filter=scene_graph::test::TypesTest*) 

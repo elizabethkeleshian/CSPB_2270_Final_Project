@@ -38,12 +38,7 @@ using glm::degrees;
  * @param angle The angle in radians to wrap
  * @return The wrapped angle in the range [-pi, pi] radians
  */
-float wrapAngle(float angle) {
-    float shifted_angle = angle + glm::pi<float>();
-    float wrapped_angle = glm::mod(shifted_angle, 2.0f * glm::pi<float>());
-    float result = wrapped_angle - glm::pi<float>();
-    return result;
-}
+float wrapAngle(float angle);
 
 } // namespace scene_graph
 

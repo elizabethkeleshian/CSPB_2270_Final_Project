@@ -1,5 +1,6 @@
 #include "scene_graph/transform.h"
 #include "scene_graph/types.h"
+#include <iostream>
 
 namespace scene_graph {
 
