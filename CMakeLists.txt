@@ -32,6 +32,7 @@ enable_testing()
 add_executable(scene_graphs_test_executable 
     test/scene_graph/node_test.cpp
     test/scene_graph/transform_test.cpp
+    test/scene_graph/types_test.cpp
 )
 
 # Link test executable with core library and GTest

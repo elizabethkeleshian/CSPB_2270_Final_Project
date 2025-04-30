@@ -1,0 +1,40 @@
+site_name: 2D Transform Documentation
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.expand
+    - navigation.sections
+    - toc.integrate
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: pink
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: pink
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.emoji
+  - pymdownx.tasklist
+  - pymdownx.snippets
+  - pymdownx.arithmatex
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Transform Math: transform_math.md 

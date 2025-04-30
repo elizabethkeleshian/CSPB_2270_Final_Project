@@ -25,6 +25,8 @@ public:
     void setRotation(float rotation) { rotation_ = radians(rotation); updateMatrix(); }
     void setPosition(const Vector2& position) { position_ = position; updateMatrix(); }
 
+    void setMatrix(const Matrix4& matrix);
+    
     const Vector2& getScale() const { return scale_; }
     float getRotation() const { return degrees(rotation_); }
     const Vector2& getPosition() const { return position_; }

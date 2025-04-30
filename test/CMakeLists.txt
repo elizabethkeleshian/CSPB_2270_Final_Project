@@ -1,9 +1,8 @@
 # Add test executable
 add_executable(scene_graphs_tests
-    scene_graph/node_test.cpp
+    main_test.cpp
     scene_graph/transform_test.cpp
-    visualization/canvas_test.cpp
-    visualization/tree_view_test.cpp
+    scene_graph/types_test.cpp
 )
 
 # Link test executable with libraries
