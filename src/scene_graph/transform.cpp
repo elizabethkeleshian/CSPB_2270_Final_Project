@@ -17,7 +17,7 @@ namespace scene_graph {
 Transform::Transform() : 
     position_(Vector2(0.0f, 0.0f)),
     rotation_(radians(0.0f)),
-    scale_(Vector3(1.0f, 1.0f, 1.0f)) 
+    scale_(Vector2(1.0f, 1.0f)) 
 {
     updateMatrix();
 }
@@ -101,7 +101,7 @@ Matrix4 Transform::getMatrix() const {
  */
 void Transform::updateMatrix() {
     matrix_ = Matrix4(1.0f);
-    matrix_ = scale(matrix_, Vector3(scale_, 1.0f));
+    matrix_ = scale(matrix_, Vector3(scale_.x, scale_.y, 1.0f));
     matrix_ = rotate(matrix_, rotation_, Vector3(0.0f, 0.0f, 1.0f));
     matrix_ = translate(matrix_, Vector3(position_, 0.0f));
 }
@@ -166,7 +166,7 @@ Transform Transform::inverse() const {
  * @return The transformed point in global coordinates
  */
 Vector2 Transform::transformPoint(const Vector2& point) const {
-    Vector4 transformed = matrix_ * Vector4(point, 0.0f, 1.0f);
+    Vector4 transformed = matrix_ * Vector4(point.x, point.y, 0.0f, 1.0f);
     return Vector2(transformed.x, transformed.y);
 }
 
@@ -180,7 +180,7 @@ Vector2 Transform::transformPoint(const Vector2& point) const {
  * @return The transformed point in local coordinates
  */
 Vector2 Transform::inverseTransformPoint(const Vector2& point) const {
-    Vector4 transformed = inverse().getMatrix() * Vector4(point, 0.0f, 1.0f);
+    Vector4 transformed = inverse().getMatrix() * Vector4(point.x, point.y, 0.0f, 1.0f);
     return Vector2(transformed.x, transformed.y);
 }
 

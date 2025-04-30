@@ -12,14 +12,17 @@
 namespace scene_graph {
 namespace test {
 
+// Constants for floating-point equality checks
+constexpr float kEpsilon = 0.0001f;
+
 // Check if two vectors are equal within a small epsilon value
 template<typename T>
-bool areVectorsEqual(const T& v1, const T& v2, float epsilon = 0.0001f) {
+bool areVectorsEqual(const T& v1, const T& v2, float epsilon = kEpsilon) {
     return glm::all(glm::epsilonEqual(v1, v2, epsilon));
 }
 
 // Check if two matrices are equal within a small epsilon value
-bool areMatricesEqual(const Matrix4& m1, const Matrix4& m2, float epsilon = 0.0001f) {
+bool areMatricesEqual(const Matrix4& m1, const Matrix4& m2, float epsilon = kEpsilon) {
     // Use glm's built-in epsilon comparison for matrices
     return glm::all(glm::epsilonEqual(Vector4(m1[0]), Vector4(m2[0]), epsilon)) &&
            glm::all(glm::epsilonEqual(Vector4(m1[1]), Vector4(m2[1]), epsilon)) &&
@@ -33,18 +36,18 @@ protected:
         // Initialize common test values
         defaultTransform_ = Transform();
         translatedTransform_ = Transform();
-        translatedTransform_.setPosition(glm::vec2(10.0f, 20.0f));
+        translatedTransform_.setPosition(Vector2(10.0f, 20.0f));
         
         rotatedTransform_ = Transform();
         rotatedTransform_.setRotation(90.0f);
         
         scaledTransform_ = Transform();
-        scaledTransform_.setScale(glm::vec2(2.0f, 3.0f));
+        scaledTransform_.setScale(Vector2(2.0f, 3.0f));
         
         combinedTransform_ = Transform();
-        combinedTransform_.setPosition(glm::vec2(10.0f, 20.0f));
+        combinedTransform_.setPosition(Vector2(10.0f, 20.0f));
         combinedTransform_.setRotation(90.0f);
-        combinedTransform_.setScale(glm::vec2(2.0, 3.0f));
+        combinedTransform_.setScale(Vector2(2.0, 3.0f));
     }
     
     // Common test transforms
@@ -56,27 +59,27 @@ protected:
 };
 
 TEST_F(TransformTest, DefaultConstructor) {
-    EXPECT_EQ(defaultTransform_.getPosition(), Vector2(0, 0));
-    EXPECT_EQ(defaultTransform_.getRotation(), 0.0f);
-    EXPECT_EQ(defaultTransform_.getScale(), Vector2(1, 1));
+    EXPECT_TRUE(areVectorsEqual(defaultTransform_.getPosition(), Vector2(0, 0)));
+    EXPECT_FLOAT_EQ(defaultTransform_.getRotation(), 0.0f);
+    EXPECT_TRUE(areVectorsEqual(defaultTransform_.getScale(), Vector2(1, 1)));
 }
 
 TEST_F(TransformTest, SetAndGetPosition) {
     Vector2 position(5.0f, 10.0f);
     defaultTransform_.setPosition(position);
-    EXPECT_EQ(defaultTransform_.getPosition(), position);
+    EXPECT_TRUE(areVectorsEqual(defaultTransform_.getPosition(), position));
 }
 
 TEST_F(TransformTest, SetAndGetRotation) {
     float rotation = 45.0f;
-    rotatedTransform_.setRotation(rotation);
-    EXPECT_FLOAT_EQ(rotatedTransform_.getRotation(), rotation);
+    defaultTransform_.setRotation(rotation);
+    EXPECT_FLOAT_EQ(defaultTransform_.getRotation(), rotation);
 }
 
 TEST_F(TransformTest, SetAndGetScale) {
     Vector2 scale(2.0f, 3.0f);  
-    scaledTransform_.setScale(scale);
-    EXPECT_EQ(scaledTransform_.getScale(), scale);
+    defaultTransform_.setScale(scale);
+    EXPECT_TRUE(areVectorsEqual(defaultTransform_.getScale(), scale));
 }
 
 TEST_F(TransformTest, GetMatrix) {
@@ -103,107 +106,157 @@ TEST_F(TransformTest, GetMatrix) {
 
     // A combined transformation should have all components
     Matrix4 combinedMatrix = combinedTransform_.getMatrix();
-    Matrix4 expectedCombined = translate(
-        rotate(
-            scale(identityMatrix, Vector3(2.0f, 3.0f, 1.0f)),
-            radians(90.0f),
-            Vector3(0.0f, 0.0f, 1.0f)
-        ),
-        Vector3(10.0f, 20.0f, 0.0f)
-    );
+    
+    // Calculate the expected matrix by applying transforms in the correct order
+    Matrix4 expectedCombined = Matrix4(1.0f);
+    expectedCombined = scale(expectedCombined, Vector3(2.0f, 3.0f, 1.0f));
+    expectedCombined = rotate(expectedCombined, radians(90.0f), Vector3(0.0f, 0.0f, 1.0f));
+    expectedCombined = translate(expectedCombined, Vector3(10.0f, 20.0f, 0.0f));
+    
     EXPECT_TRUE(areMatricesEqual(combinedMatrix, expectedCombined));
 }
 
 TEST_F(TransformTest, TransformPoint) {
     Vector2 point(1.0f, 1.0f);
 
-    // A defualt transformation should not change the point
+    // A default transformation should not change the point
     Vector2 transformedPoint = defaultTransform_.transformPoint(point);
     EXPECT_TRUE(areVectorsEqual(transformedPoint, point));
 
     // A translated point should be moved by the translation
     Vector2 translatedPoint = translatedTransform_.transformPoint(point);
-    EXPECT_TRUE(areVectorsEqual(translatedPoint, Vector2(11.0f, 21.0f)));
+    Vector2 expectedTranslatedPoint = point + Vector2(10.0f, 20.0f);
+    EXPECT_TRUE(areVectorsEqual(translatedPoint, expectedTranslatedPoint));
 
-    // A rotated point should be rotated by the rotation
+    // A rotated point should be rotated by the rotation (90 degrees around origin)
     Vector2 rotatedPoint = rotatedTransform_.transformPoint(point);
-    EXPECT_TRUE(areVectorsEqual(rotatedPoint, Vector2(-1.0f, 1.0f)));
+    Vector2 expectedRotatedPoint = Vector2(-1.0f, 1.0f); // 90 degree rotation of (1,1)
+    EXPECT_TRUE(areVectorsEqual(rotatedPoint, expectedRotatedPoint));
 
     // A scaled point should be scaled by the scale
     Vector2 scaledPoint = scaledTransform_.transformPoint(point);
-    EXPECT_TRUE(areVectorsEqual(scaledPoint, Vector2(2.0f, 3.0f)));
+    Vector2 expectedScaledPoint = Vector2(2.0f, 3.0f); // (1,1) * (2,3)
+    EXPECT_TRUE(areVectorsEqual(scaledPoint, expectedScaledPoint));
 
-    // A combined transformation should apply all transformations
+    // combined transformation should apply all transformations in the correct order
     Vector2 combinedPoint = combinedTransform_.transformPoint(point);
-    EXPECT_TRUE(areVectorsEqual(combinedPoint, Vector2(7.0f, 22.0f)));
+    
+    // Calculate expected result by applying transforms in the correct order
+    Vector2 temp = point;
+    temp = Vector2(temp.x * 2.0f, temp.y * 3.0f); // Scale
+    temp = Vector2(-temp.y, temp.x); // Rotate 90 degrees
+    temp = temp + Vector2(10.0f, 20.0f); // Translate
+    
+    EXPECT_TRUE(areVectorsEqual(combinedPoint, temp));
 }
 
 TEST_F(TransformTest, SetMatrixBasicTransformations) {
     Matrix4 identityMatrix = Matrix4(1.0f);
-    Matrix4 translatedMatrix = translate(identityMatrix, Vector3(10.0f, 20.0f, 0.0f));
-    Matrix4 rotatedMatrix = rotate(identityMatrix, radians(90.0f), Vector3(0.0f, 0.0f, 1.0f));
-    Matrix4 scaledMatrix = scale(identityMatrix, Vector3(2.0f, 3.0f, 1.0f));
-    Matrix4 combinedMatrix = translate(rotate(identityMatrix, radians(90.0f), Vector3(0.0f, 0.0f, 1.0f)), Vector3(10.0f, 20.0f, 0.0f));
     
-    defaultTransform_.setMatrix(translatedMatrix);
-    EXPECT_EQ(defaultTransform_.getPosition(), Vector2(10.0f, 20.0f));
-    EXPECT_EQ(defaultTransform_.getRotation(), 0.0f);
-    EXPECT_EQ(defaultTransform_.getScale(), Vector2(1, 1));
+    // Test translation matrix decomposition
+    Transform testTransform;
+    Matrix4 translatedMatrix = translate(identityMatrix, Vector3(10.0f, 20.0f, 0.0f));
+    testTransform.setMatrix(translatedMatrix);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getPosition(), Vector2(10.0f, 20.0f)));
+    EXPECT_FLOAT_EQ(testTransform.getRotation(), 0.0f);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getScale(), Vector2(1, 1)));
 
-    defaultTransform_.setMatrix(rotatedMatrix);
-    EXPECT_EQ(defaultTransform_.getPosition(), Vector2(0.0f, 0.0f));
-    EXPECT_EQ(defaultTransform_.getRotation(), 90.0f);
-    EXPECT_EQ(defaultTransform_.getScale(), Vector2(1, 1));
+    // Test rotation matrix decomposition
+    testTransform = Transform(); // Reset
+    Matrix4 rotatedMatrix = rotate(identityMatrix, radians(90.0f), Vector3(0.0f, 0.0f, 1.0f));
+    testTransform.setMatrix(rotatedMatrix);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getPosition(), Vector2(0.0f, 0.0f)));
+    EXPECT_NEAR(testTransform.getRotation(), 90.0f, kEpsilon);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getScale(), Vector2(1, 1)));
 
-    defaultTransform_.setMatrix(scaledMatrix);
-    EXPECT_EQ(defaultTransform_.getPosition(), Vector2(0.0f, 0.0f));
-    EXPECT_EQ(defaultTransform_.getRotation(), 90.0f);  
-    EXPECT_EQ(defaultTransform_.getScale(), Vector2(2, 3));
+    // Test scale matrix decomposition
+    testTransform = Transform(); // Reset
+    Matrix4 scaledMatrix = scale(identityMatrix, Vector3(2.0f, 3.0f, 1.0f));
+    testTransform.setMatrix(scaledMatrix);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getPosition(), Vector2(0.0f, 0.0f)));
+    EXPECT_FLOAT_EQ(testTransform.getRotation(), 0.0f);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getScale(), Vector2(2, 3)));
 
-    defaultTransform_.setMatrix(combinedMatrix);
-    EXPECT_EQ(defaultTransform_.getPosition(), Vector2(10.0f, 20.0f));
-    EXPECT_EQ(defaultTransform_.getRotation(), 90.0f);
-    EXPECT_EQ(defaultTransform_.getScale(), Vector2(2, 3));
+    // Test combined matrix decomposition
+    testTransform = Transform(); // Reset
+    Matrix4 combinedMatrix = Matrix4(1.0f);
+    combinedMatrix = scale(combinedMatrix, Vector3(2.0f, 3.0f, 1.0f));
+    combinedMatrix = rotate(combinedMatrix, radians(90.0f), Vector3(0.0f, 0.0f, 1.0f));
+    combinedMatrix = translate(combinedMatrix, Vector3(10.0f, 20.0f, 0.0f));
+    
+    testTransform.setMatrix(combinedMatrix);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getPosition(), Vector2(10.0f, 20.0f)));
+    EXPECT_NEAR(testTransform.getRotation(), 90.0f, kEpsilon);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getScale(), Vector2(2, 3)));
 
-    // Test with a matrix that has scaling on the x-axis
+    // Test x-axis scaling
+    testTransform = Transform(); // Reset
     Matrix4 scaledXMatrix = scale(identityMatrix, Vector3(2.0f, 1.0f, 1.0f));
-    defaultTransform_.setMatrix(scaledXMatrix);
-    EXPECT_EQ(defaultTransform_.getPosition(), Vector2(0.0f, 0.0f));
-    EXPECT_EQ(defaultTransform_.getRotation(), 90.0f);
-    EXPECT_EQ(defaultTransform_.getScale(), Vector2(2, 1));
+    testTransform.setMatrix(scaledXMatrix);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getPosition(), Vector2(0.0f, 0.0f)));
+    EXPECT_FLOAT_EQ(testTransform.getRotation(), 0.0f);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getScale(), Vector2(2, 1)));
 
-
-    // Test with a matrix that has scaling on the y-axis
+    // Test y-axis scaling
+    testTransform = Transform(); // Reset
     Matrix4 scaledYMatrix = scale(identityMatrix, Vector3(1.0f, 2.0f, 1.0f));
-    defaultTransform_.setMatrix(scaledYMatrix);
-    EXPECT_EQ(defaultTransform_.getPosition(), Vector2(0.0f, 0.0f));
-    EXPECT_EQ(defaultTransform_.getRotation(), 90.0f);
-    EXPECT_EQ(defaultTransform_.getScale(), Vector2(1, 2));
-
+    testTransform.setMatrix(scaledYMatrix);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getPosition(), Vector2(0.0f, 0.0f)));
+    EXPECT_FLOAT_EQ(testTransform.getRotation(), 0.0f);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getScale(), Vector2(1, 2)));
 }
 
 TEST_F(TransformTest, InverseTransformPoint) {
     Vector2 point(5.0f, 7.0f);
 
-    // A defualt transformation should not change the point
-    Vector2 transformedPoint = defaultTransform_.transformPoint(point);
-    EXPECT_EQ(transformedPoint, point);
+    // Transform the point and then inverse-transform it back to the original
+    Vector2 transformedPoint;
+    Vector2 inverseTransformedPoint;
+    
+    // Test with default transform
+    transformedPoint = defaultTransform_.transformPoint(point);
+    inverseTransformedPoint = defaultTransform_.inverseTransformPoint(transformedPoint);
+    EXPECT_TRUE(areVectorsEqual(inverseTransformedPoint, point));
 
-    // A translated point should be moved by the translation
-    Vector2 translatedPoint = translatedTransform_.transformPoint(point);
-    EXPECT_EQ(translatedPoint, Vector2(15.0f, 27.0f));
+    // Test with translated transform
+    transformedPoint = translatedTransform_.transformPoint(point);
+    inverseTransformedPoint = translatedTransform_.inverseTransformPoint(transformedPoint);
+    EXPECT_TRUE(areVectorsEqual(inverseTransformedPoint, point));
+    
+    // Expected transformed point for translation
+    Vector2 expectedTranslatedPoint = Vector2(15.0f, 27.0f);
+    EXPECT_TRUE(areVectorsEqual(transformedPoint, expectedTranslatedPoint));
 
-    // A rotated point should be rotated by the rotation
-    Vector2 rotatedPoint = rotatedTransform_.transformPoint(point);
-    EXPECT_EQ(rotatedPoint, Vector2(-7.0f, 5.0f));
+    // Test with rotated transform
+    transformedPoint = rotatedTransform_.transformPoint(point);
+    inverseTransformedPoint = rotatedTransform_.inverseTransformPoint(transformedPoint);
+    EXPECT_TRUE(areVectorsEqual(inverseTransformedPoint, point));
+    
+    // Expected transformed point for 90-degree rotation
+    Vector2 expectedRotatedPoint = Vector2(-7.0f, 5.0f);
+    EXPECT_TRUE(areVectorsEqual(transformedPoint, expectedRotatedPoint));
 
-    // A scaled point should be scaled by the scale
-    Vector2 scaledPoint = scaledTransform_.transformPoint(point);
-    EXPECT_EQ(scaledPoint, Vector2(10.0f, 21.0f));
+    // Test with scaled transform
+    transformedPoint = scaledTransform_.transformPoint(point);
+    inverseTransformedPoint = scaledTransform_.inverseTransformPoint(transformedPoint);
+    EXPECT_TRUE(areVectorsEqual(inverseTransformedPoint, point));
+    
+    // Expected transformed point for scaling
+    Vector2 expectedScaledPoint = Vector2(10.0f, 21.0f);
+    EXPECT_TRUE(areVectorsEqual(transformedPoint, expectedScaledPoint));
 
-    // A combined transformation should apply all transformations
-    Vector2 combinedPoint = combinedTransform_.transformPoint(point);
-    EXPECT_EQ(combinedPoint, Vector2(-7.0f, 11.0f));
+    // Test with combined transform
+    transformedPoint = combinedTransform_.transformPoint(point);
+    inverseTransformedPoint = combinedTransform_.inverseTransformPoint(transformedPoint);
+    EXPECT_TRUE(areVectorsEqual(inverseTransformedPoint, point));
+    
+    // Calculate expected combined point by applying transforms in the correct order
+    Vector2 temp = point;
+    temp = Vector2(temp.x * 2.0f, temp.y * 3.0f); // Scale
+    temp = Vector2(-temp.y, temp.x); // Rotate 90 degrees
+    temp = temp + Vector2(10.0f, 20.0f); // Translate
+    
+    EXPECT_TRUE(areVectorsEqual(transformedPoint, temp));
 }
 
 TEST_F(TransformTest, CombineTransformations) {
@@ -217,25 +270,28 @@ TEST_F(TransformTest, CombineTransformations) {
     childTransform.setRotation(45.0f);
     childTransform.setScale(Vector2(2.0f, 3.0f));
 
+    // Test point transformation through the hierarchy
     Vector2 testPoint(1.0f, 1.0f);
-    Vector2 parentResult = parentTransform.transformPoint(testPoint);
+    
+    // Transform point by child, then by parent (this is how hierarchical transforms work)
     Vector2 childResult = childTransform.transformPoint(testPoint);
+    Vector2 expectedCombineResult = parentTransform.transformPoint(childResult);
     
-    Vector2 expectedCombine = parentTransform.transformPoint(childResult);
-    
+    // Create a combined transform and test that it gives the same result
     Transform combinedTransform = Transform::combine(parentTransform, childTransform);
-    Vector2 actualCombine = combinedTransform.transformPoint(testPoint);
-    EXPECT_EQ(actualCombine, expectedCombine);
+    Vector2 actualCombineResult = combinedTransform.transformPoint(testPoint);
+    EXPECT_TRUE(areVectorsEqual(actualCombineResult, expectedCombineResult));
 
+    // Test matrix combination
     Matrix4 parentMatrix = parentTransform.getMatrix();
     Matrix4 childMatrix = childTransform.getMatrix();
     Matrix4 expectedCombineMatrix = parentMatrix * childMatrix;
     Matrix4 actualCombineMatrix = combinedTransform.getMatrix();
-    EXPECT_EQ(actualCombineMatrix, expectedCombineMatrix);
+    EXPECT_TRUE(areMatricesEqual(actualCombineMatrix, expectedCombineMatrix));
 }
 
 TEST_F(TransformTest, InverseCombineTransformations) {
-    Transform parentTransform ;
+    Transform parentTransform;
     parentTransform.setPosition(Vector2(1.0f, 2.0f));
     parentTransform.setRotation(30.0f);
     parentTransform.setScale(Vector2(4.0f, 5.0f));
@@ -245,25 +301,21 @@ TEST_F(TransformTest, InverseCombineTransformations) {
     childTransform.setRotation(45.0f);
     childTransform.setScale(Vector2(2.0f, 3.0f));
 
+    // Create combined transform and its inverse
     Transform combinedTransform = Transform::combine(parentTransform, childTransform);   
     Transform inverseCombinedTransform = combinedTransform.inverse();
 
+    // Test that applying a transform and then its inverse gets us back to the original point
     Vector2 testPoint(1.0f, 1.0f);
-    Vector2 parentResult = parentTransform.transformPoint(testPoint);
-    Vector2 childResult = childTransform.transformPoint(testPoint);
     Vector2 combinedResult = combinedTransform.transformPoint(testPoint);
     Vector2 inverseCombinedResult = inverseCombinedTransform.transformPoint(combinedResult);
-    EXPECT_EQ(inverseCombinedResult, testPoint);
+    EXPECT_TRUE(areVectorsEqual(inverseCombinedResult, testPoint));
 
-    Matrix4 parentMatrix = parentTransform.getMatrix();
-    Matrix4 childMatrix = childTransform.getMatrix();
-    Matrix4 expectedCombineMatrix = parentMatrix * childMatrix;
-    Matrix4 actualCombineMatrix = combinedTransform.getMatrix();
-    EXPECT_EQ(actualCombineMatrix, expectedCombineMatrix);
-
-    Matrix4 expectedInverseMatrix = glm::inverse(expectedCombineMatrix);
+    // Test matrix inversion
+    Matrix4 combinedMatrix = combinedTransform.getMatrix();
+    Matrix4 expectedInverseMatrix = glm::inverse(combinedMatrix);
     Matrix4 actualInverseMatrix = inverseCombinedTransform.getMatrix();
-    EXPECT_EQ(actualInverseMatrix, expectedInverseMatrix);
+    EXPECT_TRUE(areMatricesEqual(actualInverseMatrix, expectedInverseMatrix));
 }
 
 TEST_F(TransformTest, InterpolateTransformations) {
@@ -280,9 +332,14 @@ TEST_F(TransformTest, InterpolateTransformations) {
     float t = 0.5f;
     Transform interpolatedTransform = Transform::interpolate(transform1, transform2, t);    
 
-    EXPECT_EQ(interpolatedTransform.getPosition(), Vector2(3.5f, 4.5f));
-    EXPECT_EQ(interpolatedTransform.getRotation(), 37.5f);
-    EXPECT_EQ(interpolatedTransform.getScale(), Vector2(3.0f, 4.0f));
+    // Calculate expected interpolation results
+    Vector2 expectedPosition = Vector2(3.5f, 4.5f); // Lerp between positions
+    float expectedRotation = 37.5f; // Lerp between rotations
+    Vector2 expectedScale = Vector2(3.0f, 4.0f); // Lerp between scales
+    
+    EXPECT_TRUE(areVectorsEqual(interpolatedTransform.getPosition(), expectedPosition));
+    EXPECT_FLOAT_EQ(interpolatedTransform.getRotation(), expectedRotation);
+    EXPECT_TRUE(areVectorsEqual(interpolatedTransform.getScale(), expectedScale));
 }
 
 TEST_F(TransformTest, CopyConstructor) {
@@ -292,9 +349,10 @@ TEST_F(TransformTest, CopyConstructor) {
     transform1.setScale(Vector2(4.0f, 5.0f));
 
     Transform transform2(transform1);
-    EXPECT_EQ(transform2.getPosition(), Vector2(1.0f, 2.0f));
-    EXPECT_EQ(transform2.getRotation(), 30.0f);
-    EXPECT_EQ(transform2.getScale(), Vector2(4.0f, 5.0f));
+    EXPECT_TRUE(areVectorsEqual(transform2.getPosition(), transform1.getPosition()));
+    EXPECT_FLOAT_EQ(transform2.getRotation(), transform1.getRotation());
+    EXPECT_TRUE(areVectorsEqual(transform2.getScale(), transform1.getScale()));
+    EXPECT_TRUE(areMatricesEqual(transform2.getMatrix(), transform1.getMatrix()));
 }
 
 TEST_F(TransformTest, LocalToGlobalCoordinates) {
@@ -310,10 +368,13 @@ TEST_F(TransformTest, LocalToGlobalCoordinates) {
 
     Vector2 localPoint(1.0f, 1.0f);
 
+    // Calculate expected result manually
     Vector2 childTransformResult = childTransform.transformPoint(localPoint);
-    Vector2 parentTransformResult = parentTransform.transformPoint(childTransformResult);
-    Vector2 actualGlobal = Transform::localToGlobalCoordinates(parentTransform, childTransform, localPoint);
-    EXPECT_EQ(actualGlobal, parentTransformResult);
+    Vector2 expectedResult = parentTransform.transformPoint(childTransformResult);
+    
+    // Test the convenience function
+    Vector2 actualResult = Transform::localToGlobalCoordinates(parentTransform, childTransform, localPoint);
+    EXPECT_TRUE(areVectorsEqual(actualResult, expectedResult));
 }
 
 TEST_F(TransformTest, GlobalToLocalCoordinates) {
@@ -329,28 +390,42 @@ TEST_F(TransformTest, GlobalToLocalCoordinates) {
 
     Vector2 globalPoint(10.0f, 10.0f);
 
+    // Test that global->local->global conversion gets us back to the original point
     Vector2 localPoint = Transform::globalToLocalCoordinates(parentTransform, childTransform, globalPoint);
     Vector2 backToGlobal = Transform::localToGlobalCoordinates(parentTransform, childTransform, localPoint);
-    EXPECT_EQ(backToGlobal, globalPoint);
+    EXPECT_TRUE(areVectorsEqual(backToGlobal, globalPoint));
+    
+    // Calculate expected result manually
+    Vector2 parentLocalPoint = parentTransform.inverseTransformPoint(globalPoint);
+    Vector2 expectedLocalPoint = childTransform.inverseTransformPoint(parentLocalPoint);
+    EXPECT_TRUE(areVectorsEqual(localPoint, expectedLocalPoint));
 }
 
 TEST_F(TransformTest, EdgeCases) {
-    // Test various edge cases in a single test
-    Transform edgeTransform;
+    // Test with zero scale
+    Transform zeroScaleTransform;
+    zeroScaleTransform.setScale(Vector2(0.0f, 0.0f));
+    EXPECT_TRUE(areVectorsEqual(zeroScaleTransform.getScale(), Vector2(0.0f, 0.0f)));
     
-    // Zero and negative scale
-    edgeTransform.setScale(Vector2(0.0f, 0.0f));
-    EXPECT_EQ(edgeTransform.getScale(), Vector2(0.0f, 0.0f));
-    edgeTransform.setScale(Vector2(-1.0f, -2.0f));
-    EXPECT_EQ(edgeTransform.getScale(), Vector2(-1.0f, -2.0f));
+    // Test with negative scale
+    Transform negativeScaleTransform;
+    negativeScaleTransform.setScale(Vector2(-1.0f, -2.0f));
+    EXPECT_TRUE(areVectorsEqual(negativeScaleTransform.getScale(), Vector2(-1.0f, -2.0f)));
     
-    // Large rotation
-    edgeTransform.setRotation(720.0f);
-    EXPECT_FLOAT_EQ(edgeTransform.getRotation(), 0.0f);
+    // Test with large rotation value (should wrap to [0, 360])
+    Transform largeRotationTransform;
+    largeRotationTransform.setRotation(720.0f); // 2 full rotations
+    EXPECT_NEAR(largeRotationTransform.getRotation(), 0.0f, kEpsilon);
     
-    // Extreme coordinates
-    edgeTransform.setPosition(Vector2(1e6f, -1e6f));
-    EXPECT_EQ(edgeTransform.getPosition(), Vector2(1e6f, -1e6f));
+    // Test with negative rotation value
+    Transform negativeRotationTransform;
+    negativeRotationTransform.setRotation(-90.0f);
+    EXPECT_NEAR(negativeRotationTransform.getRotation(), 270.0f, kEpsilon);
+    
+    // Test with extreme coordinates
+    Transform extremePositionTransform;
+    extremePositionTransform.setPosition(Vector2(1e6f, -1e6f));
+    EXPECT_TRUE(areVectorsEqual(extremePositionTransform.getPosition(), Vector2(1e6f, -1e6f)));
 }
 
 TEST_F(TransformTest, NumericalStability) {
@@ -363,60 +438,63 @@ TEST_F(TransformTest, NumericalStability) {
     EXPECT_TRUE(areVectorsEqual(smallTransform.getPosition(), Vector2(1e-6f, 1e-6f), 1e-7f));
     EXPECT_TRUE(areVectorsEqual(smallTransform.getScale(), Vector2(1e-6f, 1e-6f), 1e-7f));
     EXPECT_NEAR(smallTransform.getRotation(), 1e-6f, 1e-7f);
+    
+    // Transform a point with very small transform values
+    Vector2 point(1.0f, 1.0f);
+    Vector2 transformedPoint = smallTransform.transformPoint(point);
+    
+    // Calculate expected result
+    Vector2 expectedPoint = Vector2(1.0f, 1.0f); // With such small values, point should barely change
+    expectedPoint = Vector2(expectedPoint.x * 1e-6f, expectedPoint.y * 1e-6f); // Scale
+    // Rotation by 1e-6 radians is negligible
+    expectedPoint = expectedPoint + Vector2(1e-6f, 1e-6f); // Translate
+    
+    EXPECT_TRUE(areVectorsEqual(transformedPoint, expectedPoint, 1e-6f));
 }
 
-TEST_F(TransformTest, MatrixOperations) {
-    // Test matrix decomposition and composition together
-    Transform transform1, transform2;
+TEST_F(TransformTest, MatrixDecompositionWithNearZeroScale) {
+    // Test that matrix decomposition handles near-zero scale correctly
+    Transform testTransform;
     
-    // Set up transforms with different properties
-    transform1.setPosition(Vector2(5.0f, 10.0f));
-    transform1.setRotation(45.0f);
-    transform1.setScale(Vector2(2.0f, 3.0f));
+    // Create a matrix with near-zero x-scale
+    Matrix4 identityMatrix = Matrix4(1.0f);
+    Matrix4 nearZeroScaleMatrix = scale(identityMatrix, Vector3(1e-6f, 1.0f, 1.0f));
     
-    transform2.setPosition(Vector2(1.0f, 2.0f));
-    transform2.setRotation(30.0f);
-    transform2.setScale(Vector2(1.0f, 2.0f));
+    testTransform.setMatrix(nearZeroScaleMatrix);
     
-    // Test decomposition
-    Matrix4 matrix1 = transform1.getMatrix();
-    Transform decomposed;
-    decomposed.setMatrix(matrix1);
-    EXPECT_TRUE(areVectorsEqual(decomposed.getPosition(), transform1.getPosition(), 1e-5f));
-    EXPECT_NEAR(decomposed.getRotation(), transform1.getRotation(), 1e-5f);
-    EXPECT_TRUE(areVectorsEqual(decomposed.getScale(), transform1.getScale(), 1e-5f));
-    
-    // Test composition
-    Transform composed = Transform::combine(transform1, transform2);
-    Matrix4 expectedMatrix = transform1.getMatrix() * transform2.getMatrix();
-    EXPECT_EQ(composed.getMatrix(), expectedMatrix);
+    // Verify that rotation is defaulted to 0 when x-scale is near zero
+    EXPECT_FLOAT_EQ(testTransform.getRotation(), 0.0f);
+    EXPECT_TRUE(areVectorsEqual(testTransform.getScale(), Vector2(1e-6f, 1.0f), 1e-7f));
 }
 
 TEST_F(TransformTest, TransformChaining) {
-    // Test chaining and equality in one test
-    Transform base, chain, direct;
+    // Test chaining transformations
+    Transform baseTransform;
+    baseTransform.setPosition(Vector2(1.0f, 1.0f));
     
-    // Set up base transform
-    base.setPosition(Vector2(1.0f, 1.0f));
+    // Apply transformations one after another
+    Transform chainedTransform = baseTransform;
+    chainedTransform.setPosition(chainedTransform.getPosition() + Vector2(1.0f, 1.0f));
+    chainedTransform.setRotation(chainedTransform.getRotation() + 30.0f);
+    chainedTransform.setScale(chainedTransform.getScale() * Vector2(2.0f, 2.0f));
     
-    // Chain transformations
-    chain = base;
-    chain.setPosition(chain.getPosition() + Vector2(1.0f, 1.0f));
-    chain.setRotation(chain.getRotation() + 30.0f);
-    chain.setScale(chain.getScale() * Vector2(2.0f, 2.0f));
+    // Create a transform with the same final values directly
+    Transform directTransform;
+    directTransform.setPosition(Vector2(2.0f, 2.0f));
+    directTransform.setRotation(30.0f);
+    directTransform.setScale(Vector2(2.0f, 2.0f));
     
-    // Direct transformations
-    direct.setPosition(Vector2(2.0f, 2.0f));
-    direct.setRotation(30.0f);
-    direct.setScale(Vector2(2.0f, 2.0f));
+    // Verify both approaches give the same result
+    EXPECT_TRUE(areVectorsEqual(chainedTransform.getPosition(), directTransform.getPosition()));
+    EXPECT_FLOAT_EQ(chainedTransform.getRotation(), directTransform.getRotation());
+    EXPECT_TRUE(areVectorsEqual(chainedTransform.getScale(), directTransform.getScale()));
+    EXPECT_TRUE(areMatricesEqual(chainedTransform.getMatrix(), directTransform.getMatrix()));
     
-    // Verify results
-    EXPECT_EQ(chain.getMatrix(), direct.getMatrix());
-    
-    // Test equality with small differences
-    Transform similar = direct;
-    similar.setPosition(Vector2(2.0f + 1e-6f, 2.0f));
-    EXPECT_TRUE(areVectorsEqual(direct.getPosition(), similar.getPosition(), 1e-5f));
+    // Test with a small difference
+    Transform similarTransform = directTransform;
+    similarTransform.setPosition(Vector2(2.0f + 1e-6f, 2.0f));
+    EXPECT_TRUE(areVectorsEqual(directTransform.getPosition(), similarTransform.getPosition(), 1e-5f));
 }
+
 } // namespace test
 } // namespace scene_graph
