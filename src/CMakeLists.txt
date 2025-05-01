@@ -2,6 +2,7 @@
 add_library(scene_graphs_core
     scene_graph/transform.cpp
     scene_graph/types.cpp
+    scene_graph/node.cpp
 )
 
 # Add visualization library
