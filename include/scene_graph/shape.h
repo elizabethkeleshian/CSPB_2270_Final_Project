@@ -5,10 +5,11 @@
 #include "types.h"
 
 namespace scene_graph {
+    using namespace std;
 
 class Shape : public Node {
 public:
-    Shape(const std::string& name);
+    Shape(const string& name);
     virtual ~Shape() = default;
 
     // Color methods

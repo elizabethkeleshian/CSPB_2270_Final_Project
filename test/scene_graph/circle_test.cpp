@@ -45,8 +45,12 @@ TEST_F(CircleTest, ContainsPoint_OnEdge) {
 TEST_F(CircleTest, ContainsPoint_Transformed) {
     circle->setRadius(1.0f);
     circle->setPosition(Vector2(1.0f, 1.0f));
-    circle->setRotation(45.0f);
-    // TODO: Test points in transformed space
+    
+    // ,ake sure the point is inside the circle after transformation
+    EXPECT_TRUE(circle->containsPoint(Vector2(1.5f, 1.5f)));
+    
+    // check if point is outside the circle after transformation
+    EXPECT_FALSE(circle->containsPoint(Vector2(2.5f, 2.5f)));
 }
 
 // Note: render() will be tested in visualization tests

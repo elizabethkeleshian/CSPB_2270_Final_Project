@@ -41,7 +41,13 @@ TEST_F(RectangleTest, ContainsPoint_Transformed) {
     rectangle->setSize(Vector2(2.0f, 2.0f));
     rectangle->setPosition(Vector2(1.0f, 1.0f));
     rectangle->setRotation(45.0f);
-    // TODO: Test points in transformed space
+    
+    // This point would be outside the rectangle if not transformed
+    // But after applying the transform, it should be inside
+    EXPECT_TRUE(rectangle->containsPoint(Vector2(2.0f, 1.0f)));
+    
+    // This point should still be outside even after transform
+    EXPECT_FALSE(rectangle->containsPoint(Vector2(3.0f, 3.0f)));
 }
 
 // Note: render() will be tested in visualization tests
