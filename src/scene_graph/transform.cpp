@@ -71,6 +71,46 @@ Transform& Transform::operator=(const Transform& original) {
 Transform::~Transform() = default;
 
 /**
+ * @brief Sets the rotation of the transform.
+ * 
+ * This function updates the rotation property of the transform.
+ * It converts the given rotation in degrees to radians and stores it.
+ * The transformation matrix is also updated to reflect the new rotation.
+ * 
+ * @param rotation The rotation in degrees to set
+ */
+void Transform::setRotation(float rotation) {
+    //Normalize rotation to [0, 360)
+    rotation = fmod(rotation, 360.0f);
+    if (rotation < 0.0f) {
+        rotation += 360.0f;
+    }
+    rotation_ = radians(rotation);
+    updateMatrix();
+}
+
+/**
+ * @brief Gets the current rotation of the transform.
+ * 
+ * This function returns the rotation of the transform in degrees.
+ * It converts the stored rotation in radians to degrees and returns it.
+ * 
+ * @return The rotation in degrees
+ */
+float Transform::getRotation() const {
+    float rotationDegrees = degrees(rotation_);
+    
+    // Normalize to [0, 360)
+    rotationDegrees = fmod(rotationDegrees, 360.0f);
+    if (rotationDegrees < 0.0f) {
+        rotationDegrees += 360.0f;
+    }
+    
+    return rotationDegrees;
+}
+
+
+/**
  * @brief Gets the current transformation matrix.
  * 
  * The transformation matrix represents the combined effect of:
@@ -100,10 +140,10 @@ Matrix4 Transform::getMatrix() const {
  * - Finally translated to their position
  */
 void Transform::updateMatrix() {
-    matrix_ = Matrix4(1.0f);
-    matrix_ = scale(matrix_, Vector3(scale_.x, scale_.y, 1.0f));
-    matrix_ = rotate(matrix_, rotation_, Vector3(0.0f, 0.0f, 1.0f));
-    matrix_ = translate(matrix_, Vector3(position_, 0.0f));
+    Matrix4 scaleMatrix = scale(Matrix4(1.0f), Vector3(scale_.x, scale_.y, 1.0f));
+    Matrix4 rotationMatrix = rotate(Matrix4(1.0f), rotation_, Vector3(0.0f, 0.0f, 1.0f));
+    Matrix4 translationMatrix = translate(Matrix4(1.0f), Vector3(position_, 0.0f));
+    matrix_ = translationMatrix * rotationMatrix * scaleMatrix;
 }
 
 /**
@@ -114,32 +154,26 @@ void Transform::updateMatrix() {
  * - Scale is calculated from the length of the basis vectors
  * - Rotation is calculated from the angle of the x-axis basis vector
  * 
- * If the x-axis scale is near zero, rotation is set to 0 to avoid division by zero.
- * 
  * @param matrix The 4x4 transformation matrix to set
  */
 void Transform::setMatrix(const Matrix4& matrix) {
     matrix_ = matrix;
     
-    // Extract translation from matrix
-    position_ = Vector2(matrix_[3][0], matrix_[3][1]);
-
-    // Calculate scale from basis vectors
-    scale_.x = length(Vector2(matrix_[0][0], matrix_[0][1]));
-    scale_.y = length(Vector2(matrix_[1][0], matrix_[1][1]));
-
-    // Calculate rotation from x-axis basis vector
-    if (scale_.x > 0.0001f) {
-        float xAxis = matrix_[0][0] / scale_.x;
-        float yAxis = matrix_[0][1] / scale_.x;
-        rotation_ = atan2(yAxis, xAxis);
-
-        // Ensure rotation is in the range [0, 360)
-        float rotationDegrees = degrees(rotation_);
-        while (rotationDegrees < 0) {
-            rotationDegrees += 360.0f;
-        }
-        rotation_ = radians(rotationDegrees);
+    // Extract translation directly
+    position_.x = matrix_[3][0]; 
+    position_.y = matrix_[3][1];
+    
+    // Extract scale - use length of the basis vectors
+    scale_.x = glm::length(glm::vec2(matrix_[0][0], matrix_[0][1]));
+    scale_.y = glm::length(glm::vec2(matrix_[1][0], matrix_[1][1]));
+    
+    // Extract rotation
+    const float kMinScale = 0.0001f;
+    if (scale_.x > kMinScale) {
+        // Calculate rotation from the normalized x basis vector
+        float cosTheta = matrix_[0][0] / scale_.x;
+        float sinTheta = matrix_[0][1] / scale_.x;
+        rotation_ = atan2(sinTheta, cosTheta);
     } else {
         rotation_ = 0.0f;
     }
@@ -173,7 +207,8 @@ Transform Transform::inverse() const {
  * @return The transformed point in global coordinates
  */
 Vector2 Transform::transformPoint(const Vector2& point) const {
-    Vector4 transformed = matrix_ * Vector4(point.x, point.y, 0.0f, 1.0f);
+    Vector4 homogeneous(point.x, point.y, 0.0f, 1.0f);
+    Vector4 transformed = matrix_ * homogeneous;
     return Vector2(transformed.x, transformed.y);
 }
 
@@ -187,7 +222,9 @@ Vector2 Transform::transformPoint(const Vector2& point) const {
  * @return The transformed point in local coordinates
  */
 Vector2 Transform::inverseTransformPoint(const Vector2& point) const {
-    Vector4 transformed = inverse().getMatrix() * Vector4(point.x, point.y, 0.0f, 1.0f);
+    Matrix4 inverseMatrix = glm::inverse(matrix_);
+    Vector4 homogeneous(point.x, point.y, 0.0f, 1.0f);
+    Vector4 transformed = inverseMatrix * homogeneous;
     return Vector2(transformed.x, transformed.y);
 }
 

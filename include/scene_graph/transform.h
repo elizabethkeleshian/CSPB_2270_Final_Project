@@ -22,13 +22,15 @@ public:
     Matrix4 getMatrix() const;
 
     void setScale(const Vector2& scale) { scale_ = scale; updateMatrix(); }
-    void setRotation(float rotation) { rotation_ = radians(rotation); updateMatrix(); }
+   // void setRotation(float rotation) { rotation_ = radians(rotation); updateMatrix(); }
     void setPosition(const Vector2& position) { position_ = position; updateMatrix(); }
+    void setRotation(float rotation);
 
     void setMatrix(const Matrix4& matrix);
     
     const Vector2& getScale() const { return scale_; }
-    float getRotation() const { return degrees(rotation_); }
+    //float getRotation() const { return degrees(rotation_); }
+    float getRotation() const;
     const Vector2& getPosition() const { return position_; }
 
     Transform inverse() const; // Returns the inverse of the transform.
