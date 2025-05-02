@@ -17,6 +17,13 @@ Node::Node(const string& name) : name_(name) {};
  * @param child The child node to add.
  */
 void Node::addChild(shared_ptr<Node> child) {
+    // Remove child from any existing parent
+    shared_ptr<Node> currentParent = child->parent_.lock();
+    if (currentParent) {
+        // Remove from current parent
+        currentParent->removeChild(child);
+    }
+
     child->parent_ = shared_from_this();
     children_.push_back(child);
 }
@@ -37,12 +44,12 @@ void Node::removeChild(shared_ptr<Node> child) {
  * @return The global transform of the node.
  */
 Transform Node::getGlobalTransform() const {
-    auto parent = parent_.lock();
+    shared_ptr<Node> parent = parent_.lock();
     if (parent) {
         // Combine parent's global transform with our local transform
         return Transform::combine(parent->getGlobalTransform(), transform_);
     }
-    return transform_;  // No parent, local is global
+    return transform_;  
 }
 
 /**

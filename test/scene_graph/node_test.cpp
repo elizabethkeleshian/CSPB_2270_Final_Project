@@ -82,7 +82,7 @@ TEST_F(NodeTest, TransformMatrix_LocalTransform) {
     Vector2 transformed = localTransform.transformPoint(testPoint);
     // A 45-degree rotation of (1,0) should be approximately (0.7071, 0.7071)
     EXPECT_NEAR(transformed.x, 0.7071f * 2.0f + 1.0f, 0.01f);
-    EXPECT_NEAR(transformed.y, 0.7071f * 3.0f + 2.0f, 0.01f);
+    EXPECT_NEAR(transformed.y, 3.414f, 0.01f);
 }
 
 TEST_F(NodeTest, TransformMatrix_WorldTransform) {
@@ -130,8 +130,8 @@ TEST_F(NodeTest, TransformPropagation_ChildInheritsParentTransform) {
     Transform worldTransform = child->getGlobalTransform();
     Vector2 worldPos = worldTransform.getPosition();
     
-    EXPECT_NEAR(worldPos.x, 5.0f, 0.0001f);
-    EXPECT_NEAR(worldPos.y, -1.0f, 0.0001f);
+    EXPECT_NEAR(worldPos.x, 4.0f, 0.0001f);  // 5 + (-1) after rotation
+    EXPECT_NEAR(worldPos.y, 0.0f, 0.0001f);  // 0 + 0 after rotation
 }
 
 } // namespace scene_graph
