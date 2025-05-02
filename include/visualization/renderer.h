@@ -2,38 +2,44 @@
 #define VISUALIZATION_RENDERER_H
 
 #include <memory>
-#include <vector>
 
 // Forward declaration
 namespace scene_graph {
-    class Shape;
+class Shape;
 }
 
 namespace visualization {
 
 class Renderer {
 public:
-    Renderer();
-    ~Renderer();
+  Renderer();
+  ~Renderer();
 
-    // Initialization and cleanup
-    bool initialize();
-    void cleanup();
+  // delete move constructor and assignment operator
+  Renderer(Renderer &&) = delete;
+  Renderer &operator=(Renderer &&) = delete;
 
-    // Rendering methods
-    void beginFrame();
-    void endFrame();
-    void renderShape(const scene_graph::Shape& shape);
+  // delete copy constructor and assignment operator
+  Renderer(const Renderer &) = delete;
+  Renderer &operator=(const Renderer &) = delete;
 
-    // Window management
-    void setViewport(int width, int height);
+  // Initialization and cleanup
+  bool initialize();
+  void cleanup();
+
+  // Rendering methods
+  void beginFrame();
+  void endFrame();
+  void renderShape(const scene_graph::Shape &shape);
+
+  // Window management
+  void setViewport(int width, int height);
 
 private:
-    // Private implementation details
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 } // namespace visualization
 
-#endif // VISUALIZATION_RENDERER_H 
+#endif // VISUALIZATION_RENDERER_H

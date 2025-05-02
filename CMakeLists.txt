@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
 project(SceneGraphs VERSION 1.0)
 
+# Add this line to generate compile_commands.json
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+if(NOT WIN32)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${CMAKE_BINARY_DIR}/compile_commands.json
+            ${CMAKE_SOURCE_DIR}/compile_commands.json
+    )
+endif()
+
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

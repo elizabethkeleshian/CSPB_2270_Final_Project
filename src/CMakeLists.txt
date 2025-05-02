@@ -30,4 +30,7 @@ target_link_libraries(visualization_core
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARY}
     glfw
-) 
+)
+
+# Link GLM to bring in its headers
+target_link_libraries(scene_graphs_core PUBLIC glm::glm) 

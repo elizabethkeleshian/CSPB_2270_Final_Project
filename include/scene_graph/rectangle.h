@@ -7,21 +7,30 @@ namespace scene_graph {
 
 class Rectangle : public Shape {
 public:
-    Rectangle(const std::string& name, const Vector2& size = Vector2(1.0f));
-    virtual ~Rectangle() = default;
+  static constexpr Vector2 DEFAULT_SIZE = Vector2(1.0F);
+  Rectangle(const std::string &name, const Vector2 &size = DEFAULT_SIZE);
+  virtual ~Rectangle() = default;
 
-    // Size methods
-    void setSize(const Vector2& size);
-    const Vector2& getSize() const;
+  // Delete copy constructor and assignment operator
+  Rectangle(const Rectangle &) = delete;
+  Rectangle &operator=(const Rectangle &) = delete;
 
-    // Override virtual methods from Shape
-    void render() const override;
-    bool containsPoint(const Vector2& point) const override;
+  // Delete move constructor and assignment operator
+  Rectangle(Rectangle &&) = delete;
+  Rectangle &operator=(Rectangle &&) = delete;
+
+  // Size methods
+  void setSize(const Vector2 &size);
+  const Vector2 &getSize() const;
+
+  // Override virtual methods from Shape
+  void render() const override;
+  bool containsPoint(const Vector2 &point) const override;
 
 private:
-    Vector2 size_;
+  Vector2 size_;
 };
 
 } // namespace scene_graph
 
-#endif // SCENE_GRAPH_RECTANGLE_H 
+#endif // SCENE_GRAPH_RECTANGLE_H

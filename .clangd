@@ -1,0 +1,20 @@
+CompileFlags:
+  Add: [-Wall, -Wextra, -std=c++17, "-I/opt/homebrew/include", "-I/usr/local/include"]
+  
+Diagnostics:
+  ClangTidy:
+    Add: [
+      modernize*,
+      cppcoreguidelines*,
+      performance*,
+      readability*,
+      bugprone*,
+    ]
+    Remove: [
+      modernize-use-trailing-return-type,
+      readability-braces-around-statements,
+      readability-identifier-length,
+    ]
+
+Index:
+  Background: Build

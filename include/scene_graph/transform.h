@@ -1,57 +1,70 @@
 #ifndef SCENE_GRAPH_TRANSFORM_H
 #define SCENE_GRAPH_TRANSFORM_H
 
-#include <glm/glm.hpp>
+#include "scene_graph/types.h"
 
 namespace scene_graph {
 
-// Forward declarations
-using Vector2 = glm::vec2;
-using Matrix4 = glm::mat4;
-
 /**
  * @brief A class that represents a transform in 2D space.
- * 
- * This class provides a way to store and manipulate the position, rotation, and scale of an object in 2D space.
- * It also provides methods for combining and interpolating transforms, as well as converting between local and global coordinates.
+ *
+ * This class provides a way to store and manipulate the position, rotation, and
+ * scale of an object in 2D space. It also provides methods for combining and
+ * interpolating transforms, as well as converting between local and global
+ * coordinates.
  */
 class Transform {
 public:
-    Transform();
-    Transform(const Transform& other);
-    Transform& operator=(const Transform& other);
-    ~Transform();
+  Transform();
+  Transform(const Transform &original);
+  Transform &operator=(const Transform &original);
+  ~Transform() = default;
+  Transform(Transform &&) = default;
 
-    Matrix4 getMatrix() const;
+  // delete move assignment operator
+  Transform &operator=(Transform &&) = default;
 
-    void setScale(const Vector2& scale) { scale_ = scale; updateMatrix(); }
-   // void setRotation(float rotation) { rotation_ = radians(rotation); updateMatrix(); }
-    void setPosition(const Vector2& position) { position_ = position; updateMatrix(); }
-    void setRotation(float rotation);
+  [[nodiscard]] const Matrix4 &getMatrix() const { return matrix_; }
 
-    void setMatrix(const Matrix4& matrix);
-    
-    const Vector2& getScale() const { return scale_; }
-    //float getRotation() const { return degrees(rotation_); }
-    float getRotation() const;
-    const Vector2& getPosition() const { return position_; }
+  void setScale(const Vector2 &scale) {
+    scale_ = scale;
+    updateMatrix();
+  }
 
-    Transform inverse() const; // Returns the inverse of the transform.
+  void setPosition(const Vector2 &position) {
+    position_ = position;
+    updateMatrix();
+  }
+  void setRotation(float rotation);
 
-    Vector2 transformPoint(const Vector2& point) const; // Transforms a point from local to global coordinates.
-    Vector2 inverseTransformPoint(const Vector2& point) const; // Transforms a point from global to local coordinates.
+  void setMatrix(const Matrix4 &matrix);
 
-    static Transform combine(const Transform& parent, const Transform& child); // Combines two transforms.
-    static Transform interpolate(const Transform& a, const Transform& b, float t); // Interpolates between two transforms.
-    static Vector2 localToGlobalCoordinates(const Transform& parent, const Transform& child, const Vector2& point); // Transforms a point from local to global coordinates.
-    static Vector2 globalToLocalCoordinates(const Transform& parent, const Transform& child, const Vector2& point); // Transforms a point from global to local coordinates.
-    
+  [[nodiscard]] const Vector2 &getScale() const { return scale_; }
+  // float getRotation() const { return degrees(rotation_); }
+  [[nodiscard]] float getRotation() const;
+  [[nodiscard]] const Vector2 &getPosition() const { return position_; }
+
+  [[nodiscard]] Transform inverse() const;
+
+  [[nodiscard]] Vector2 transformPoint(const Vector2 &point) const;
+  [[nodiscard]] Vector2 inverseTransformPoint(const Vector2 &point) const;
+
+  static Transform combine(const Transform &parent, const Transform &child);
+  static Transform interpolate(const Transform &start, const Transform &end,
+                               float factor);
+  static Vector2 localToGlobalCoordinates(const Transform &parent,
+                                          const Transform &child,
+                                          const Vector2 &point);
+  static Vector2 globalToLocalCoordinates(const Transform &parent,
+                                          const Transform &child,
+                                          const Vector2 &point);
+
 private:
-    void updateMatrix(); // Updates the matrix of the transform.
-    Vector2 position_; // The position of the transform.
-    float rotation_; // The rotation of the transform.
-    Vector2 scale_; // The scale of the transform.
-    Matrix4 matrix_; // The matrix of the transform.
+  void updateMatrix();
+  Vector2 position_;
+  float rotation_;
+  Vector2 scale_;
+  Matrix4 matrix_;
 };
 
 } // namespace scene_graph

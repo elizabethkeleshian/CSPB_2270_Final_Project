@@ -1,41 +1,50 @@
 #ifndef VISUALIZATION_SHADER_H
 #define VISUALIZATION_SHADER_H
 
-#include <string>
-#include <glm/glm.hpp>
 #include "scene_graph/types.h"
+#include <glm/glm.hpp>
+#include <string>
 
 namespace visualization {
-using namespace std;
-using namespace scene_graph;
+
 /**
  * @brief The Shader class is responsible for loading and managing shaders.
- * 
+ *
  * This class handles the loading of vertex and fragment shaders from files,
  * compiling them, and setting uniforms.
  */
 class Shader {
 public:
-    Shader();
-    ~Shader();
+  Shader();
+  ~Shader();
 
-    // Shader management
-    bool loadFromFile(const string& vertexPath, const string& fragmentPath);
-    void use() const;
+  // delete move constructor and assignment operator
+  Shader(Shader &&) = delete;
+  Shader &operator=(Shader &&) = delete;
 
-    // Uniform setters
-    void setUniform(const string& name, const Matrix4& matrix);
-    void setUniform(const string& name, const Vector4& color);
-    void setUniform(const string& name, float value);
+  // delete copy constructor and assignment operator
+  Shader(const Shader &) = delete;
+  Shader &operator=(const Shader &) = delete;
+
+  // Shader management
+  bool loadFromFile(const std::string &vertexPath,
+                    const std::string &fragmentPath);
+  void use() const;
+
+  // Uniform setters
+  void setUniform(const std::string &name, const scene_graph::Matrix4 &matrix);
+  void setUniform(const std::string &name, const scene_graph::Vector4 &color);
+  void setUniform(const std::string &name, float value);
 
 private:
-    unsigned int programId_;
-    unsigned int vertexShaderId_;
-    unsigned int fragmentShaderId_; 
+  unsigned int programId_;
+  unsigned int vertexShaderId_;
+  unsigned int fragmentShaderId_;
 
-    bool compileShader(unsigned int& shader, const string& source, const string& type);
+  bool compileShader(unsigned int &shader, const std::string &source,
+                     const std::string &type);
 };
 
 } // namespace visualization
 
-#endif // VISUALIZATION_SHADER_H 
+#endif // VISUALIZATION_SHADER_H

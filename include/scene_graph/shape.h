@@ -2,31 +2,35 @@
 #define SCENE_GRAPH_SHAPE_H
 
 #include "scene_graph/node.h"
-#include <glm/glm.hpp>
+#include "scene_graph/types.h"
 
 namespace scene_graph {
-    
-// Use the glm type directly
-using Vector2 = glm::vec2;
-using Vector4 = glm::vec4;
 
 class Shape : public Node {
 public:
-    Shape(const std::string& name);
-    virtual ~Shape() = default;
+  Shape(std::string name);
+  virtual ~Shape() = default;
 
-    // Color methods
-    void setColor(const Vector4& color);
-    const Vector4& getColor() const;
+  // Delete copy constructor and assignment operator
+  Shape(const Shape &) = delete;
+  Shape &operator=(const Shape &) = delete;
 
-    // Pure virtual methods to be implemented by derived classes
-    virtual void render() const = 0;
-    virtual bool containsPoint(const Vector2& point) const = 0;
+  // Delete move constructor and assignment operator
+  Shape(Shape &&) = delete;
+  Shape &operator=(Shape &&) = delete;
 
-protected:
-    Vector4 color_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f); // Default white
+  // Color methods
+  void setColor(const Vector4 &color);
+  const Vector4 &getColor() const;
+
+  // Pure virtual methods to be implemented by derived classes
+  virtual void render() const = 0;
+  virtual bool containsPoint(const Vector2 &point) const = 0;
+
+private:
+  Vector4 color_ = Vector4(1.0F, 1.0F, 1.0F, 1.0F); // Default white
 };
 
 } // namespace scene_graph
 
-#endif // SCENE_GRAPH_SHAPE_H 
+#endif // SCENE_GRAPH_SHAPE_H
