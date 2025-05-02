@@ -1,15 +1,18 @@
 #ifndef SCENE_GRAPH_SHAPE_H
 #define SCENE_GRAPH_SHAPE_H
 
-#include "node.h"
-#include "types.h"
+#include "scene_graph/node.h"
+#include <glm/glm.hpp>
 
 namespace scene_graph {
-    using namespace std;
+    
+// Use the glm type directly
+using Vector2 = glm::vec2;
+using Vector4 = glm::vec4;
 
 class Shape : public Node {
 public:
-    Shape(const string& name);
+    Shape(const std::string& name);
     virtual ~Shape() = default;
 
     // Color methods

@@ -1,8 +1,7 @@
 #ifndef SCENE_GRAPH_RECTANGLE_H
 #define SCENE_GRAPH_RECTANGLE_H
 
-#include "shape.h"
-#include "types.h"
+#include "scene_graph/shape.h"
 
 namespace scene_graph {
 

@@ -4,8 +4,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/epsilon.hpp>
+#include <memory>
+
+// Forward declarations for visualization namespace
+namespace visualization {
+    class Renderer;
+    class Canvas;
+}
 
 namespace scene_graph { 
+
+// Forward declarations
+class Node;
+class Shape;
+class Rectangle;
+class Circle;
 
 // Vector types
 using Vector2 = glm::vec2;
@@ -21,6 +34,18 @@ using glm::rotate;
 using glm::scale;
 using glm::radians;
 using glm::degrees;
+
+// Using std namespace for shared_ptr
+using std::shared_ptr;
+using std::weak_ptr;
+
+// Smart pointer type aliases
+// using NodePtr = shared_ptr<Node>;
+// using RendererPtr = shared_ptr<visualization::Renderer>;
+// using CanvasPtr = shared_ptr<visualization::Canvas>;
+// using ShapePtr = shared_ptr<Shape>;
+// using RectanglePtr = shared_ptr<Rectangle>;
+// using CirclePtr = shared_ptr<Circle>;
 
 /**
  * @brief Wraps an angle to the range [-pi, pi] radians, ensuring shortest path interpolation.

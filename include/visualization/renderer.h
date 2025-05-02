@@ -3,7 +3,11 @@
 
 #include <memory>
 #include <vector>
-#include "../scene_graph/shape.h"
+
+// Forward declaration
+namespace scene_graph {
+    class Shape;
+}
 
 namespace visualization {
 

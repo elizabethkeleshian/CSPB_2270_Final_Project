@@ -1,12 +1,15 @@
 #include "visualization/shader.h"
 #include <gtest/gtest.h>
+#include "scene_graph/types.h"
+
+using namespace std;
 
 namespace visualization {
 
 class ShaderTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        shader = std::make_unique<Shader>();
+        shader = make_unique<Shader>();
     }
 
     std::unique_ptr<Shader> shader;
@@ -28,14 +31,14 @@ TEST_F(ShaderTest, Use_ActivatesShader) {
 
 TEST_F(ShaderTest, SetUniform_Matrix) {
     shader->loadFromFile("shaders/basic.vert", "shaders/basic.frag");
-    glm::mat4 matrix(1.0f);
+    Matrix4 matrix(1.0f);
     shader->setUniform("model", matrix);
     // TODO: Verify uniform is set
 }
 
 TEST_F(ShaderTest, SetUniform_Color) {
     shader->loadFromFile("shaders/basic.vert", "shaders/basic.frag");
-    glm::vec4 color(1.0f, 0.0f, 0.0f, 1.0f);
+    Vector4 color(1.0f, 0.0f, 0.0f, 1.0f);
     shader->setUniform("color", color);
     // TODO: Verify uniform is set
 }

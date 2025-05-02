@@ -2,9 +2,12 @@
 #define SCENE_GRAPH_TRANSFORM_H
 
 #include <glm/glm.hpp>
-#include "types.h"
 
 namespace scene_graph {
+
+// Forward declarations
+using Vector2 = glm::vec2;
+using Matrix4 = glm::mat4;
 
 /**
  * @brief A class that represents a transform in 2D space.

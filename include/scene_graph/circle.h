@@ -1,12 +1,12 @@
 #ifndef SCENE_GRAPH_CIRCLE_H
 #define SCENE_GRAPH_CIRCLE_H
 
-#include "shape.h"
-#include "types.h"
+#include "scene_graph/shape.h"
 
 namespace scene_graph {
 
 class Circle : public Shape {
+
 public:
     Circle(const std::string& name, float radius = 0.5f);
     virtual ~Circle() = default;

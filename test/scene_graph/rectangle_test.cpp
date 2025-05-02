@@ -18,7 +18,7 @@ TEST_F(RectangleTest, Constructor_DefaultSize) {
 }
 
 TEST_F(RectangleTest, Constructor_CustomSize) {
-    auto customRect = std::make_shared<Rectangle>("custom", Vector2(2.0f, 3.0f));
+    std::shared_ptr<Rectangle> customRect = std::make_shared<Rectangle>("custom", Vector2(2.0f, 3.0f));
     EXPECT_EQ(customRect->getSize(), Vector2(2.0f, 3.0f));
 }
 

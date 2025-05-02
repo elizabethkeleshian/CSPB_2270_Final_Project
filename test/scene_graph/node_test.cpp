@@ -1,16 +1,18 @@
 #include "scene_graph/node.h"
 #include <gtest/gtest.h>
 #include <memory>
+#include "scene_graph/types.h"
 
 namespace scene_graph {
+using namespace std;
 
 class NodeTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        node = std::make_shared<Node>("testNode");
+        node = make_shared<Node>("testNode");
     }
-
-    std::shared_ptr<Node> node;
+ 
+    shared_ptr<Node> node;
 };
 
 TEST_F(NodeTest, Constructor_SetsName) {
@@ -44,14 +46,14 @@ TEST_F(NodeTest, Transform_SetScale) {
 }
 
 TEST_F(NodeTest, ParentChild_AddChild) {
-    auto child = std::make_shared<Node>("child");
+    shared_ptr<Node> child = make_shared<Node>("child");
     node->addChild(child);
     EXPECT_TRUE(child->hasParent(node));
     EXPECT_EQ(node->getChildren().size(), 1);
 }
 
 TEST_F(NodeTest, ParentChild_RemoveChild) {
-    auto child = std::make_shared<Node>("child");
+    shared_ptr<Node> child = make_shared<Node>("child");
     node->addChild(child);
     node->removeChild(child);
     EXPECT_TRUE(child->isOrphaned());
@@ -87,7 +89,7 @@ TEST_F(NodeTest, TransformMatrix_LocalTransform) {
 
 TEST_F(NodeTest, TransformMatrix_WorldTransform) {
     // Test world transform matrix calculation with parent
-    auto parent = std::make_shared<Node>("parent");
+    shared_ptr<Node> parent = make_shared<Node>("parent");
     parent->setPosition(Vector2(1.0f, 1.0f));
     node->setPosition(Vector2(1.0f, 1.0f));
     parent->addChild(node);
@@ -102,9 +104,9 @@ TEST_F(NodeTest, TransformMatrix_WorldTransform) {
 }
 
 TEST_F(NodeTest, AddChild_AlreadyHasParent_UpdatesParent) {
-    auto parent1 = std::make_shared<Node>("parent1");
-    auto parent2 = std::make_shared<Node>("parent2");
-    auto child = std::make_shared<Node>("child");
+    shared_ptr<Node> parent1 = make_shared<Node>("parent1");
+    shared_ptr<Node> parent2 = make_shared<Node>("parent2");
+    shared_ptr<Node> child = make_shared<Node>("child");
     
     parent1->addChild(child);
     EXPECT_TRUE(child->hasParent(parent1));
@@ -115,8 +117,8 @@ TEST_F(NodeTest, AddChild_AlreadyHasParent_UpdatesParent) {
 }
 
 TEST_F(NodeTest, TransformPropagation_ChildInheritsParentTransform) {
-    auto parent = std::make_shared<Node>("parent");
-    auto child = std::make_shared<Node>("child");
+    shared_ptr<Node> parent = make_shared<Node>("parent");
+    shared_ptr<Node> child = make_shared<Node>("child");
     
     parent->setPosition(Vector2(5.0f, 0.0f));
     parent->setRotation(90.0f);

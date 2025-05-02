@@ -13,6 +13,7 @@ add_library(visualization_core
     visualization/canvas.cpp
     visualization/tree_view.cpp
     visualization/shader.cpp
+    visualization/renderer.cpp
 )
 
 # Include directories

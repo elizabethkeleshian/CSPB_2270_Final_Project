@@ -7,12 +7,16 @@ add_executable(scene_graphs_tests
     scene_graph/shape_test.cpp
     scene_graph/rectangle_test.cpp
     scene_graph/circle_test.cpp
+    visualization/canvas_test.cpp
+   # visualization/tree_view_test.cpp
+    #visualization/shader_test.cpp
+    visualization/renderer_test.cpp
 )
 
 # Link test executable with libraries
 target_link_libraries(scene_graphs_tests
     scene_graphs_core
-   # visualization_core
+    visualization_core
     ${GTEST_LIBRARIES}
     pthread
 )
@@ -24,5 +28,6 @@ add_test(NAME node_tests COMMAND scene_graphs_tests --gtest_filter=scene_graph::
 add_test(NAME shape_tests COMMAND scene_graphs_tests --gtest_filter=scene_graph::ShapeTest*)
 add_test(NAME rectangle_tests COMMAND scene_graphs_tests --gtest_filter=scene_graph::RectangleTest*)
 add_test(NAME circle_tests COMMAND scene_graphs_tests --gtest_filter=scene_graph::CircleTest*)
-
+add_test(NAME canvas_tests COMMAND scene_graphs_tests --gtest_filter=visualization::CanvasTest*)
+add_test(NAME renderer_tests COMMAND scene_graphs_tests --gtest_filter=visualization::RendererTest*)
 enable_testing() 

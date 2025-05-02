@@ -17,10 +17,5 @@ namespace visualization {
         glDeleteProgram(programId_);
     }
 
-    bool Shader::loadFromFile(const std::string& vertexPath, const std::string& fragmentPath) {
-        // Return true for now to fix warning
-        return true;
-    }
-
     
 } // namespace visualization    

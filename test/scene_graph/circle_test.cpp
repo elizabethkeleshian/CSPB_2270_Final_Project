@@ -18,7 +18,7 @@ TEST_F(CircleTest, Constructor_DefaultRadius) {
 }
 
 TEST_F(CircleTest, Constructor_CustomRadius) {
-    auto customCircle = std::make_shared<Circle>("custom", 2.0f);
+    std::shared_ptr<Circle> customCircle = std::make_shared<Circle>("custom", 2.0f);
     EXPECT_FLOAT_EQ(customCircle->getRadius(), 2.0f);
 }
 
