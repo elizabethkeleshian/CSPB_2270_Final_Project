@@ -131,8 +131,15 @@ void Transform::setMatrix(const Matrix4& matrix) {
     // Calculate rotation from x-axis basis vector
     if (scale_.x > 0.0001f) {
         float xAxis = matrix_[0][0] / scale_.x;
-        float yAxis = matrix_[1][0] / scale_.x;
+        float yAxis = matrix_[0][1] / scale_.x;
         rotation_ = atan2(yAxis, xAxis);
+
+        // Ensure rotation is in the range [0, 360)
+        float rotationDegrees = degrees(rotation_);
+        while (rotationDegrees < 0) {
+            rotationDegrees += 360.0f;
+        }
+        rotation_ = radians(rotationDegrees);
     } else {
         rotation_ = 0.0f;
     }

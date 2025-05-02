@@ -1,4 +1,4 @@
-#include "../../include/visualization/circle.h"
+#include "../../include/scene_graph/circle.h"
 
 namespace scene_graph {
     using namespace std;

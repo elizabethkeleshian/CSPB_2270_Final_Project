@@ -22,6 +22,9 @@ public:
 
 private:
     unsigned int programId_;
+    unsigned int vertexShaderId_;
+    unsigned int fragmentShaderId_; 
+
     bool compileShader(unsigned int& shader, const std::string& source, const std::string& type);
 };
 

@@ -4,10 +4,20 @@
 
 namespace scene_graph {
 
+// Create a concrete implementation of the abstract Shape class for testing
+class TestShape : public Shape {
+public:
+    TestShape(const std::string& name) : Shape(name) {}
+    
+    // Implement pure virtual methods
+    void render() const override {}
+    bool containsPoint(const Vector2& point) const override { return false; }
+};
+
 class ShapeTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        shape = std::make_shared<Shape>("testShape");
+        shape = std::make_shared<TestShape>("testShape");
     }
 
     std::shared_ptr<Shape> shape;

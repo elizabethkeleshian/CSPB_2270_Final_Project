@@ -3,9 +3,21 @@
 namespace scene_graph {
 
 float wrapAngle(float angle) {
-    float shifted_angle = angle + glm::pi<float>();
-    float wrapped_angle = glm::mod(shifted_angle, 2.0f * glm::pi<float>());
-    float result = wrapped_angle - glm::pi<float>();
+    // Handle missing or infinite angles 
+    if (!isfinite(angle)) {
+        return isnan(angle) ? angle : 0.0f;
+    }
+
+    // Get the  modulo in range [-2π, 2π]
+    float result = std::fmod(angle, 2.0f * glm::pi<float>());
+    
+    // put in range [-π, π]
+     if (result > glm::pi<float>()) {
+        result -= 2.0f * glm::pi<float>();
+    } else if (result < -glm::pi<float>()) {
+        result += 2.0f * glm::pi<float>();
+    }
+
     return result;
 }
 
