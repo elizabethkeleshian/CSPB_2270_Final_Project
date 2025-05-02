@@ -36,3 +36,4 @@ test/build/
 .vscode/
 docs/
 venv/
+.cache/
