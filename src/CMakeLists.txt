@@ -14,6 +14,7 @@ add_library(visualization_core
     visualization/tree_view.cpp
     visualization/shader.cpp
     visualization/renderer.cpp
+    visualization/window.cpp
 )
 
 # Include directories

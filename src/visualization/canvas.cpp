@@ -51,29 +51,44 @@ void Canvas::render() {
     return;
   }
   renderer_->beginFrame();
+
+  // Render the scene graph starting from the root
   if (root_) {
     renderNode(root_);
   }
 
-  for (const std::shared_ptr<scene_graph::Shape> &shape : shapes_) {
+  // Render any standalone shapes
+  for (const auto &shape : shapes_) {
     renderer_->renderShape(*shape);
   }
+
   renderer_->endFrame();
 }
 
 void Canvas::renderNode(const std::shared_ptr<scene_graph::Node> &node) {
-  // check if node is a shape
+  // If node is a shape, render it
   auto shape = std::dynamic_pointer_cast<scene_graph::Shape>(node);
   if (shape) {
+    // Highlight selected node with a different color
+    scene_graph::Vector4 originalColor;
+    bool isSelected = (selectedNode_ == node);
+
+    if (isSelected) {
+      originalColor = shape->getColor();
+      // Adjust color to indicate selection (e.g., add a yellow tint)
+      scene_graph::Vector4 highlightColor(1.0f, 1.0f, 0.0f, originalColor.a);
+      shape->setColor(highlightColor);
+    }
+
     renderer_->renderShape(*shape);
 
-    // add highlight effect
-    if (selectedNode_ == node) {
-      // TODO: add highlight effect if time permits
+    // Restore original color if changed
+    if (isSelected) {
+      shape->setColor(originalColor);
     }
   }
 
-  // recursively render children
+  // Recursively render all children
   for (const auto &child : node->getChildren()) {
     renderNode(child);
   }

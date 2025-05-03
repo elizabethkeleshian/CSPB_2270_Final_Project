@@ -6,10 +6,13 @@
 
 namespace visualization {
 
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 600;
+
 class Window {
 public:
   using MouseCallback = std::function<void(double, double)>;
-  using KeyCallback = std::function<void(int, int)>;
+  using KeyCallback = std::function<void(int, int, int, int)>;
 
   Window();
   ~Window();
@@ -25,9 +28,9 @@ public:
   // Window management
   bool create(int width, int height, const std::string &title);
   void close();
-  bool shouldClose() const;
+  [[nodiscard]] bool shouldClose() const;
   void swapBuffers();
-  void pollEvents();
+  static void pollEvents();
 
   // Input callbacks
   void setMouseCallback(MouseCallback callback);

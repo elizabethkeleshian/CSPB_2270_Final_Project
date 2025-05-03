@@ -10,17 +10,18 @@ void TreeView::setRoot(const std::shared_ptr<scene_graph::Node> &root) {
   root_ = root;
 }
 
-std::shared_ptr<scene_graph::Node> TreeView::getRoot() const { return root_; }
+// std::shared_ptr<scene_graph::Node> TreeView::getRoot() const { return root_;
+// }
 
-void TreeView::render() {
-  // clear node positions
-  nodePositions_.clear();
+// void TreeView::render() {
+//   // clear node positions
+//   nodePositions_.clear();
 
-  const int yPosition = 10;
+//   const int yPosition = 10;
 
-  if (!root_) {
-    renderNode(root_, 0, yPosition);
-  }
-}
+//   if (!root_) {
+//     renderNode(root_, 0, yPosition);
+//   }
+// }
 
 } // namespace visualization

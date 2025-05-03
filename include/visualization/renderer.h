@@ -2,14 +2,9 @@
 #define VISUALIZATION_RENDERER_H
 
 #include <memory>
-
-// Forward declaration
-namespace scene_graph {
-class Shape;
-}
+#include <scene_graph/shape.h>
 
 namespace visualization {
-
 class Renderer {
 public:
   Renderer();
