@@ -23,8 +23,8 @@ void TreeView::render() {
   // Clear node positions for hit testing
   nodePositions_.clear();
 
-  // Start rendering from the top left corner
-  int yPosition = 20;
+  // Start rendering from the top left corner with the constant Y position
+  int yPosition = constants::TREE_VIEW_STARTING_Y;
 
   // Render all nodes in the tree recursively
   renderNode(root_, 0, yPosition);
@@ -42,8 +42,10 @@ void TreeView::renderNode(const std::shared_ptr<scene_graph::Node> &node,
   // Convert screen space to scene space
   // These conversion factors may need adjustment based on your viewport
   // settings
-  float sceneX = -9.0f + (float)xPosition / 50.0f;
-  float sceneY = 8.0f - (float)yPosition / 35.0f;
+  float sceneX = constants::TREE_VIEW_X_OFFSET +
+                 ((float)xPosition / constants::TREE_VIEW_X_SCALE);
+  float sceneY = constants::TREE_VIEW_Y_OFFSET -
+                 ((float)yPosition / constants::TREE_VIEW_Y_SCALE);
 
   // Store node position for hit testing
   NodePosition pos;
@@ -91,14 +93,17 @@ int TreeView::countNodes(const std::shared_ptr<scene_graph::Node> &node) const {
 }
 
 void TreeView::selectAt(const Vector2 &position) {
-  // Convert scene space to screen space
-  // These conversion factors should match those in renderNode
-  float screenX = (position.x + 9.0f) * 50.0f;
-  float screenY = (8.0f - position.y) * 35.0f;
+  // Convert scene space to screen space using constants
+  float screenX = (position.x + constants::TREE_VIEW_SCREEN_X_OFFSET) *
+                  constants::TREE_VIEW_SCREEN_X_FACTOR;
+  float screenY = (constants::TREE_VIEW_SCREEN_Y_OFFSET - position.y) *
+                  constants::TREE_VIEW_SCREEN_Y_FACTOR;
 
   // Check if the position is within any node's area
   for (const auto &nodePos : nodePositions_) {
-    float nodeWidth = 150.0f - (nodePos.x - 10) / INDENT_SIZE * 10.0f;
+    float nodeWidth =
+        constants::TREE_VIEW_NODE_WIDTH_BASE -
+        (nodePos.x - 10) / INDENT_SIZE * constants::TREE_VIEW_NODE_WIDTH_ADJUST;
 
     if (screenX >= nodePos.x && screenX <= nodePos.x + nodeWidth &&
         screenY >= nodePos.y && screenY <= nodePos.y + nodePos.height) {

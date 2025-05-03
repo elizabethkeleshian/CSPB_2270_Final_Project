@@ -1,5 +1,6 @@
 #pragma once
 
+#include "constants.h"
 #include "scene_graph/node.h"
 #include "types.h"
 #include <utility> // For std::move
@@ -10,6 +11,14 @@ class TreeView {
 public:
   TreeView();
   ~TreeView();
+
+  // disable copy constructor and assignment operator
+  TreeView(const TreeView &) = delete;
+  TreeView &operator=(const TreeView &) = delete;
+
+  // disable move constructor and assignment operator
+  TreeView(TreeView &&) = delete;
+  TreeView &operator=(TreeView &&) = delete;
 
   void setRoot(const std::shared_ptr<scene_graph::Node> &root);
   [[nodiscard]] std::shared_ptr<scene_graph::Node> getRoot() const;
@@ -45,8 +54,10 @@ private:
 
   std::vector<NodePosition> nodePositions_;
   // UI constants
-  static constexpr int INDENT_SIZE = 20; // Pixels per depth level
-  static constexpr int NODE_HEIGHT = 24; // Height of a node in pixels
+  static constexpr int INDENT_SIZE =
+      constants::TREE_VIEW_INDENT_SIZE; // Pixels per depth level
+  static constexpr int NODE_HEIGHT =
+      constants::TREE_VIEW_NODE_HEIGHT; // Height of a node in pixels
 };
 
 } // namespace visualization

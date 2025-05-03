@@ -103,7 +103,8 @@ void Application::handleMouseMoved(double xpos, double ypos) {
     if (isTopLevelCar || isCarBody) {
       // Calculate a rotation factor based on horizontal movement
       float rotationFactor =
-          delta.x * 90.0f; // Adjust multiplier for desired effect
+          delta.x *
+          constants::WHEEL_ROTATION_FACTOR; // Using constant from constants.h
 
       // Apply rotation to wheel children - need to traverse the hierarchy
       // correctly
@@ -150,8 +151,18 @@ void Application::handleMouseButton(int button, int action, int mods) {
 
     Vector2 mousePos = windowToSceneCoordinates(xpos, ypos);
 
+    // Add debugging
+    std::cout << "Mouse clicked at: (" << mousePos.x << ", " << mousePos.y
+              << ")\n";
+
     // Check if click is in tree view area (left side of screen)
-    bool clickedInTreeView = showTreeView_ && mousePos.x < -7.0f;
+    // In handleMouseButton method
+    bool clickedInTreeView =
+        showTreeView_ &&
+        mousePos.x < -constants::SCENE_HALF_WIDTH + constants::TREE_VIEW_WIDTH;
+    if (clickedInTreeView) {
+      std::cout << "Clicked in tree view area" << std::endl;
+    }
 
     if (action == GLFW_PRESS) {
       if (clickedInTreeView && treeView_) {
@@ -223,21 +234,26 @@ void Application::handleMouseButton(int button, int action, int mods) {
 }
 
 Vector2 Application::windowToSceneCoordinates(double xpos, double ypos) const {
-  float sceneX = static_cast<float>(xpos) / window_->getWidth() * 20.0f - 10.0f;
-  float sceneY =
-      10.0f - static_cast<float>(ypos) / window_->getHeight() * 20.0f;
+  float sceneX = static_cast<float>(xpos) / window_->getWidth() *
+                     constants::WINDOW_TO_SCENE_SCALE -
+                 constants::WINDOW_TO_SCENE_OFFSET_X;
+  float sceneY = constants::WINDOW_TO_SCENE_OFFSET_Y -
+                 static_cast<float>(ypos) / window_->getHeight() *
+                     constants::WINDOW_TO_SCENE_SCALE;
   return Vector2(sceneX, sceneY);
 }
 
 void Application::setupSceneGraph() {
   // Create a red car
-  auto redCar = createCar("RedCar", Vector2(-3.0f, 0.0f),
-                          Vector4(0.8f, 0.2f, 0.2f, 1.0f) // Red
+  auto redCar = createCar(
+      "RedCar", Vector2(constants::RED_CAR_START_X, constants::RED_CAR_START_Y),
+      Vector4(0.8f, 0.2f, 0.2f, 1.0f) // Red
   );
 
-  // Create a blue car
-  auto blueCar = createCar("BlueCar", Vector2(3.0f, 0.0f),
-                           Vector4(0.2f, 0.4f, 0.8f, 1.0f) // Blue
+  auto blueCar = createCar(
+      "BlueCar",
+      Vector2(constants::BLUE_CAR_START_X, constants::BLUE_CAR_START_Y),
+      Vector4(0.2f, 0.4f, 0.8f, 1.0f) // Blue
   );
 
   // Set up hierarchy - the cars are now direct children of the root
@@ -271,15 +287,17 @@ void Application::updateAnimations(float deltaTime) {
   for (const auto &child : root_->getChildren()) {
     if (child->getName() == "RedCar") {
       // Move the red car in a circle
-      float radius = 4.0f;
-      float speed = 0.5f;
+      float radius = constants::RED_CAR_CIRCLE_RADIUS;
+      float speed = constants::RED_CAR_MOVEMENT_SPEED;
       child->setPosition(Vector2(cos(animationTime_ * speed) * radius,
                                  sin(animationTime_ * speed) * radius));
 
       // Rotate the car to face the direction of movement
       float angle =
           atan2(sin(animationTime_ * speed), cos(animationTime_ * speed));
-      angle = angle * 180.0f / M_PI + 90.0f; // Convert to degrees and adjust
+      angle =
+          angle * 180.0f / M_PI +
+          constants::CAR_ROTATION_ADJUSTMENT; // Convert to degrees and adjust
       child->setRotation(angle);
 
       // Find the body to update the wheels
@@ -298,8 +316,9 @@ void Application::updateAnimations(float deltaTime) {
       }
     } else if (child->getName() == "BlueCar") {
       // Move the blue car back and forth
-      float xPos =
-          3.0f + sin(animationTime_ * constants::CAR_MOVEMENT_SPEED) * 3.0f;
+      float xPos = constants::BLUE_CAR_OSCILLATION_CENTER +
+                   sin(animationTime_ * constants::CAR_MOVEMENT_SPEED) *
+                       constants::BLUE_CAR_OSCILLATION_AMPLITUDE;
       child->setPosition(Vector2(xPos, 0.0f));
 
       // Rotate wheels (speed depends on movement direction)
@@ -355,6 +374,7 @@ void Application::run() {
 std::shared_ptr<scene_graph::Node>
 Application::createCar(const std::string &name, const Vector2 &position,
                        const Vector4 &bodyColor) {
+
   // Create a parent node for the entire car
   auto car = std::make_shared<scene_graph::Node>(name);
   car->setPosition(position);

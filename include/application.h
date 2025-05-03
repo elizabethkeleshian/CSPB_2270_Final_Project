@@ -31,7 +31,7 @@ private:
   // Window properties
   static constexpr int WINDOW_WIDTH = constants::DEFAULT_WINDOW_WIDTH;
   static constexpr int WINDOW_HEIGHT = constants::DEFAULT_WINDOW_HEIGHT;
-  static constexpr char WINDOW_TITLE[] = "Scene Graph Visualization";
+  static constexpr const char *WINDOW_TITLE = constants::WINDOW_TITLE;
 
   // Input handling
   void setupInputCallbacks();

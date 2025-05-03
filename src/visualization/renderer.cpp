@@ -1,4 +1,5 @@
 #include "visualization/renderer.h"
+#include "constants.h"
 #include "scene_graph/circle.h"
 #include "scene_graph/rectangle.h"
 #include "types.h"
@@ -22,8 +23,8 @@ namespace visualization {
  * and improves compilation times in the rest of the codebase.
  */
 struct Renderer::Impl {
-  int viewportWidth = 800;
-  int viewportHeight = 600;
+  int viewportWidth = constants::DEFAULT_VIEWPORT_WIDTH;
+  int viewportHeight = constants::DEFAULT_VIEWPORT_HEIGHT;
   bool initialized = false;
 
   unsigned int rectangleVAO = 0;
@@ -324,7 +325,7 @@ bool Renderer::initTextRendering() {
   }
 
   // Set font size
-  FT_Set_Pixel_Sizes(face, 0, 20);
+  FT_Set_Pixel_Sizes(face, 0, constants::TEXT_FONT_SIZE);
 
   // Disable byte-alignment restriction
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -524,7 +525,7 @@ void Renderer::drawText(const std::string &text, float x, float y,
   glBindVertexArray(impl_->textVAO);
 
   // Convert original scene coordinates to scaling factor
-  float scale = 0.003f; // Adjust as needed for text size
+  float scale = 0.01f; // Adjust as needed for text size
 
   // Iterate through characters
   float xpos = x;
