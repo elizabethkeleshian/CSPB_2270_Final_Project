@@ -1,11 +1,13 @@
 #include "visualization/window.h"
+#include "constants.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 
 namespace visualization {
 
 Window::Window()
-    : windowHandle_(nullptr), width_(WINDOW_WIDTH), height_(WINDOW_HEIGHT) {}
+    : windowHandle_(nullptr), width_(constants::DEFAULT_WINDOW_WIDTH),
+      height_(constants::DEFAULT_WINDOW_HEIGHT) {}
 
 Window::~Window() { close(); }
 
@@ -97,5 +99,22 @@ void Window::setKeyCallback(KeyCallback callback) {
 int Window::getWidth() const { return width_; }
 
 int Window::getHeight() const { return height_; }
+
+void Window::setMouseButtonCallback(MouseButtonCallback callback) {
+  mouseButtonCallback_ = std::move(callback);
+
+  // Set up the GLFW callback if we have a window
+  if (windowHandle_) {
+    glfwSetMouseButtonCallback(
+        static_cast<GLFWwindow *>(windowHandle_),
+        [](GLFWwindow *window, int button, int action, int mods) {
+          auto *thisWindow =
+              static_cast<Window *>(glfwGetWindowUserPointer(window));
+          if (thisWindow && thisWindow->mouseButtonCallback_) {
+            thisWindow->mouseButtonCallback_(button, action, mods);
+          }
+        });
+  }
+}
 
 } // namespace visualization

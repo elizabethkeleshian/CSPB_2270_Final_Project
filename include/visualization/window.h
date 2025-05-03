@@ -6,9 +6,6 @@
 
 namespace visualization {
 
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
-
 class Window {
 public:
   using MouseCallback = std::function<void(double, double)>;
@@ -37,8 +34,13 @@ public:
   void setKeyCallback(KeyCallback callback);
 
   // Getters
-  int getWidth() const;
-  int getHeight() const;
+  [[nodiscard]] int getWidth() const;
+  [[nodiscard]] int getHeight() const;
+
+  using MouseButtonCallback = std::function<void(int, int, int)>;
+  void setMouseButtonCallback(MouseButtonCallback callback);
+  MouseButtonCallback mouseButtonCallback_;
+  void *getWindowHandle() const { return windowHandle_; }
 
 private:
   void *windowHandle_;

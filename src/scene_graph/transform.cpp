@@ -6,12 +6,12 @@ namespace scene_graph {
 /**
  * @brief Default constructor for the Transform class.
  *
- * Initializes the transform with:
- * - Position at origin (0, 0)
- * - No rotation (0 degrees)
- * - Uniform scale of 1.0
+ * Creates our standard transform with neutral values:
+ * - Position at origin (0, 0) - center of our scene
+ * - Zero rotation - aligned with world axes
+ * - Unit scale - original size of shapes
  *
- * The transformation matrix is automatically updated to reflect these values.
+ * We use this as the starting point for all scene objects.
  */
 Transform::Transform()
     : position_(Vector2(0.0F, 0.0F)), rotation_(radians(0.0F)),
@@ -22,12 +22,11 @@ Transform::Transform()
 /**
  * @brief Copy constructor for the Transform class.
  *
- * Creates a new transform with the same properties as the original:
- * - Position
- * - Rotation
- * - Scale
+ * Duplicates an existing transform, which we need for cloning objects
+ * or creating related transforms with similar properties.
  *
- * The transformation matrix is automatically updated to reflect these values.
+ * We explicitly recalculate the matrix rather than just copying it to
+ * ensure consistent behavior with our decomposition methods.
  *
  * @param original The transform to copy values from
  */
@@ -40,12 +39,8 @@ Transform::Transform(const Transform &original)
 /**
  * @brief Assignment operator for the Transform class.
  *
- * Copies all properties from the original transform:
- * - Position
- * - Rotation
- * - Scale
- *
- * The transformation matrix is automatically updated to reflect these values.
+ * Used when replacing one transform with another. Common during
+ * drag operations or when syncing transforms between objects.
  *
  * @param original The transform to assign values from
  * @return Reference to this transform after assignment
@@ -61,9 +56,11 @@ Transform &Transform::operator=(const Transform &original) {
 /**
  * @brief Sets the rotation of the transform.
  *
- * This function updates the rotation property of the transform.
- * It converts the given rotation in degrees to radians and stores it.
- * The transformation matrix is also updated to reflect the new rotation.
+ * We work with degrees externally for user-friendliness, but store
+ * radians internally for efficiency.
+ *
+ * Normalizes rotation to [0, 360) to avoid growing values when
+ * objects rotate continuously in one direction.
  *
  * @param rotation The rotation in degrees to set
  */
@@ -81,10 +78,10 @@ void Transform::setRotation(float rotation) {
 /**
  * @brief Gets the current rotation of the transform.
  *
- * This function returns the rotation of the transform in degrees.
- * It converts the stored rotation in radians to degrees and returns it.
+ * Converts internal radians to degrees and normalizes the result
+ * to ensure consistent rotation values for the UI.
  *
- * @return The rotation in degrees
+ * @return The rotation in degrees in the range [0, 360)
  */
 float Transform::getRotation() const {
   float rotationDegrees = degrees(rotation_);
@@ -102,15 +99,13 @@ float Transform::getRotation() const {
 /**
  * @brief Updates the internal transformation matrix.
  *
- * The matrix is constructed by applying transformations in the following order:
- * 1. Scale
- * 2. Rotate
- * 3. Translate
+ * Crucial for our scene graph - builds the transformation matrix from
+ * position, rotation, and scale. We use the SRT order (Scale → Rotate →
+ * Translate) which was chosen after testing various approaches with
+ * hierarchical objects.
  *
- * This order ensures that transformations are applied in the expected way:
- * - Objects are first scaled around their origin
- * - Then rotated around their origin
- * - Finally translated to their position
+ * This ordering ensures wheels rotate properly around their centers when
+ * attached to moving cars, for example.
  */
 void Transform::updateMatrix() {
   Matrix4 scaleMatrix = scale(Matrix4(1.0F), Vector3(scale_.x, scale_.y, 1.0f));
@@ -122,13 +117,13 @@ void Transform::updateMatrix() {
 }
 
 /**
- * @brief Sets the transformation matrix and extracts position, rotation, and
- * scale.
+ * @brief Sets the transformation matrix and extracts components.
  *
- * Decomposes the given matrix into its components:
- * - Position is extracted from the translation components (m[3][0] and m[3][1])
- * - Scale is calculated from the length of the basis vectors
- * - Rotation is calculated from the angle of the x-axis basis vector
+ * Used when working with external matrix sources or when propagating
+ * transforms through the scene graph hierarchy. This was tricky to get right!
+ *
+ * The decomposition process is sensitive to numerical precision, especially
+ * for rotation extraction when scale approaches zero.
  *
  * @param matrix The 4x4 transformation matrix to set
  */
@@ -151,6 +146,7 @@ void Transform::setMatrix(const Matrix4 &matrix) {
     float sinTheta = matrix_[0][1] / scale_.x;
     rotation_ = atan2(sinTheta, cosTheta);
   } else {
+    // Avoid division by near-zero scale
     rotation_ = 0.0F;
   }
 }
@@ -158,11 +154,9 @@ void Transform::setMatrix(const Matrix4 &matrix) {
 /**
  * @brief Calculates the inverse of this transform.
  *
- * The inverse transform will undo the transformations applied by this
- * transform. For a transform T, the inverse T⁻¹ satisfies: T * T⁻¹ = I
- * (identity matrix).
- *
- * The inverse is calculated by inverting the transformation matrix.
+ * Essential for converting between coordinate spaces, especially
+ * for hit testing and input handling. When a user clicks on the canvas,
+ * we need to convert screen coordinates to object space.
  *
  * @return A new Transform representing the inverse transformation
  */
@@ -175,10 +169,9 @@ Transform Transform::inverse() const {
 /**
  * @brief Transforms a point from local to global coordinates.
  *
- * Applies this transform's matrix to the given point:
- * 1. Scales the point
- * 2. Rotates the point
- * 3. Translates the point
+ * Core operation for rendering - converts a point in an object's
+ * local coordinate system to world space. For example, converting
+ * wheel vertices from wheel-local space to world space.
  *
  * @param point The point to transform in local coordinates
  * @return The transformed point in global coordinates
@@ -192,8 +185,9 @@ Vector2 Transform::transformPoint(const Vector2 &point) const {
 /**
  * @brief Transforms a point from global to local coordinates.
  *
- * Applies the inverse of this transform's matrix to the given point.
- * This effectively undoes the transformation applied by transformPoint.
+ * Useful for hit testing and selection. When a user clicks at a
+ * world position, we need to check if that point is inside each object
+ * by converting to the object's local space.
  *
  * @param point The point to transform in global coordinates
  * @return The transformed point in local coordinates

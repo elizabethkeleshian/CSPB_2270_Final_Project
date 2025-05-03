@@ -10,6 +10,13 @@
 #include <memory>
 namespace visualization {
 
+/**
+ * @brief Private implementation struct for the renderer
+ *
+ * Using the pImpl pattern to hide OpenGL details and reduce
+ * header dependencies. This keeps our public interface clean
+ * and improves compilation times in the rest of the codebase.
+ */
 struct Renderer::Impl {
   int viewportWidth = 800;
   int viewportHeight = 600;
@@ -24,8 +31,17 @@ Renderer::Renderer() : impl_(std::make_unique<Impl>()) {};
 
 Renderer::~Renderer() { cleanup(); }
 
+/**
+ * @brief Initializes the renderer with OpenGL resources
+ *
+ * Sets up shaders, VAOs, and buffers needed for drawing our
+ * shapes. We've kept this simple with basic vertex and fragment
+ * shaders since our 2D editing needs are minimal.
+ *
+ * @return true if initialization succeeded, false otherwise
+ */
 bool Renderer::initialize() {
-  // initialize GLEW
+  // Initialize GLEW - must happen after GL context is created
   if (glewInit() != GLEW_OK) {
     std::cerr << "Failed to initialize GLEW\n";
     return false;
@@ -55,7 +71,7 @@ bool Renderer::initialize() {
         }
     )";
 
-  // compile shaders
+  // Compile shaders
   unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
   glCompileShader(vertexShader);
@@ -69,12 +85,12 @@ bool Renderer::initialize() {
     return false;
   }
 
-  // compile fragment shader
+  // Compile fragment shader
   unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
   glCompileShader(fragmentShader);
 
-  // check for compilation errors
+  // Check for compilation errors
   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
   if (success == GL_FALSE) {
     glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
@@ -82,13 +98,13 @@ bool Renderer::initialize() {
     return false;
   }
 
-  // link shaders
+  // Link shaders
   impl_->shaderProgram = glCreateProgram();
   glAttachShader(impl_->shaderProgram, vertexShader);
   glAttachShader(impl_->shaderProgram, fragmentShader);
   glLinkProgram(impl_->shaderProgram);
 
-  // check for linking errors
+  // Check for linking errors
   glGetProgramiv(impl_->shaderProgram, GL_LINK_STATUS, &success);
   if (success == GL_FALSE) {
     glGetProgramInfoLog(impl_->shaderProgram, 512, nullptr, infoLog);
@@ -96,11 +112,11 @@ bool Renderer::initialize() {
     return false;
   }
 
-  // delete shaders as they are already linked to the program
+  // Delete shaders as they are already linked to the program
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
-  // rectangle geometry
+  // Rectangle geometry - centered unit square makes transforms intuitive
   float rectangleVertices[] = {
       // positions
       -0.5F, -0.5F, // bottom left
@@ -109,7 +125,7 @@ bool Renderer::initialize() {
       -0.5F, 0.5F   // top left
   };
 
-  // rectangle indices
+  // Rectangle indices - two triangles forming a quad
   unsigned int rectangleIndices[] = {
       0, 1, 2, // first triangle
       2, 3, 0  // second triangle
@@ -119,6 +135,8 @@ bool Renderer::initialize() {
   glGenVertexArrays(1, &impl_->rectangleVAO);
   glGenBuffers(1, &VBO);
   glGenBuffers(1, &EBO);
+
+  glBindVertexArray(impl_->rectangleVAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), rectangleVertices,
@@ -134,7 +152,8 @@ bool Renderer::initialize() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  // Set up circle geometry (approximated as a polygon)
+  // Circle - approximated as polygon with triangles from center
+  // 32 segments gives smooth appearance at reasonable performance
   const int circleSegments = 32;
   float circleVertices[circleSegments * 2 + 2];
   circleVertices[0] = 0.0f; // center x
@@ -174,7 +193,7 @@ bool Renderer::initialize() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  // Set up OpenGL state
+  // Enable alpha blending for semi-transparent shapes
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -182,6 +201,12 @@ bool Renderer::initialize() {
   return true;
 }
 
+/**
+ * @brief Releases all OpenGL resources
+ *
+ * Important for clean shutdown and preventing resource leaks.
+ * This also allows reinitialization if needed.
+ */
 void Renderer::cleanup() {
   if (impl_->initialized) {
     glDeleteVertexArrays(1, &impl_->rectangleVAO);
@@ -191,6 +216,12 @@ void Renderer::cleanup() {
   }
 }
 
+/**
+ * @brief Starts a new frame by clearing the screen
+ *
+ * Sets a pleasing blue-green background color that makes
+ * our scene objects stand out visually.
+ */
 void Renderer::beginFrame() {
   glClearColor(0.2F, 0.3F, 0.3F, 1.0F);
   glClear(GL_COLOR_BUFFER_BIT);

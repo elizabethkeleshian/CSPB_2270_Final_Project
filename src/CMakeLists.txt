@@ -1,3 +1,8 @@
+# add application library
+add_library(application_core
+    application.cpp
+)
+
 # Add scene graph library
 add_library(scene_graphs_core
     scene_graph/transform.cpp

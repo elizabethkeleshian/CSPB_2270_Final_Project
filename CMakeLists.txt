@@ -47,6 +47,7 @@ add_executable(scene_graphs_app src/main.cpp)
 target_link_libraries(scene_graphs_app 
     scene_graphs_core
     visualization_core
+    application_core
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARY}
     glfw
