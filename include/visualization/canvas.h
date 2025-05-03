@@ -46,6 +46,9 @@ public:
   hitTest(const scene_graph::Vector2 &position) const;
   void selectNode(const std::shared_ptr<scene_graph::Node> &node);
   [[nodiscard]] std::shared_ptr<scene_graph::Node> getSelectedNode() const;
+  [[nodiscard]] std::shared_ptr<scene_graph::Node>
+  hitTestRecursive(const std::shared_ptr<scene_graph::Node> &node,
+                   const scene_graph::Vector2 &position) const;
 
 private:
   std::shared_ptr<Renderer> renderer_;
