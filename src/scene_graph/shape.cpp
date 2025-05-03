@@ -1,5 +1,5 @@
 #include "scene_graph/shape.h"
-#include "scene_graph/types.h"
+#include "types.h"
 
 namespace scene_graph {
 

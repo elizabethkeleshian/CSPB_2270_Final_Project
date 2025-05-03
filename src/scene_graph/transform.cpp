@@ -1,5 +1,5 @@
 #include "scene_graph/transform.h"
-#include "scene_graph/types.h"
+#include "types.h"
 
 namespace scene_graph {
 
@@ -237,8 +237,9 @@ Transform Transform::interpolate(const Transform &start, const Transform &end,
                                  float factor) {
   Transform result;
   result.position_ = glm::mix(start.position_, end.position_, factor);
-  result.rotation_ = wrapAngle(
-      glm::mix(wrapAngle(start.rotation_), wrapAngle(end.rotation_), factor));
+  result.rotation_ = scene_graph::wrapAngle(
+      glm::mix(scene_graph::wrapAngle(start.rotation_),
+               scene_graph::wrapAngle(end.rotation_), factor));
   result.scale_ = glm::mix(start.scale_, end.scale_, factor);
   result.updateMatrix();
   return result;

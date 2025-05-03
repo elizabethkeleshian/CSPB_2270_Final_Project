@@ -1,7 +1,7 @@
 #include "scene_graph/circle.h"
 #include "scene_graph/node.h"
 #include "scene_graph/rectangle.h"
-#include "scene_graph/types.h"
+#include "types.h"
 #include "visualization/canvas.h"
 #include "visualization/renderer.h"
 #include <gtest/gtest.h>

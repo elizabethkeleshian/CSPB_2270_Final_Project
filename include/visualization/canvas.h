@@ -2,7 +2,7 @@
 
 #include "scene_graph/node.h"
 #include "scene_graph/shape.h"
-#include "scene_graph/types.h"
+#include "types.h"
 #include "visualization/renderer.h"
 #include <memory>
 #include <vector>
@@ -43,12 +43,12 @@ public:
   void clear();
   void renderNode(const std::shared_ptr<scene_graph::Node> &node);
   [[nodiscard]] std::shared_ptr<scene_graph::Node>
-  hitTest(const scene_graph::Vector2 &position) const;
+  hitTest(const Vector2 &position) const;
   void selectNode(const std::shared_ptr<scene_graph::Node> &node);
   [[nodiscard]] std::shared_ptr<scene_graph::Node> getSelectedNode() const;
   [[nodiscard]] std::shared_ptr<scene_graph::Node>
   hitTestRecursive(const std::shared_ptr<scene_graph::Node> &node,
-                   const scene_graph::Vector2 &position) const;
+                   const Vector2 &position) const;
 
 private:
   std::shared_ptr<Renderer> renderer_;

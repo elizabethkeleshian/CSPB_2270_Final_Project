@@ -2,7 +2,7 @@
 #define SCENE_GRAPH_NODE_H
 
 #include "scene_graph/transform.h"
-#include "scene_graph/types.h"
+#include "types.h"
 #include <memory>
 #include <vector>
 

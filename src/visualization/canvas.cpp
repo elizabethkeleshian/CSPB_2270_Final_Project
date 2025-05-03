@@ -1,7 +1,7 @@
 #include "visualization/canvas.h"
 #include "scene_graph/node.h"
 #include "scene_graph/shape.h"
-#include "scene_graph/types.h"
+#include "types.h"
 #include "visualization/renderer.h"
 
 namespace visualization {
@@ -39,7 +39,30 @@ void Canvas::clear() {
 }
 
 void Canvas::selectNode(const std::shared_ptr<scene_graph::Node> &node) {
+  // If we already have a selected node, reset its color
+  if (selectedNode_) {
+    if (auto shape =
+            std::dynamic_pointer_cast<scene_graph::Shape>(selectedNode_)) {
+      Vector4 originalColor;
+      // Get the original color (before selection)
+      // This is a simplified approach - you might want to store original colors
+      originalColor = shape->getColor();
+      // Remove highlight
+      shape->setColor(originalColor);
+    }
+  }
+
+  // Set the new selected node
   selectedNode_ = node;
+
+  // If the new node is not null, highlight it
+  if (node) {
+    if (auto shape = std::dynamic_pointer_cast<scene_graph::Shape>(node)) {
+      Vector4 originalColor = shape->getColor();
+      Vector4 highlightColor(1.0f, 1.0f, 0.0f, originalColor.a);
+      shape->setColor(highlightColor);
+    }
+  }
 }
 
 std::shared_ptr<scene_graph::Node> Canvas::getSelectedNode() const {
@@ -70,13 +93,13 @@ void Canvas::renderNode(const std::shared_ptr<scene_graph::Node> &node) {
   auto shape = std::dynamic_pointer_cast<scene_graph::Shape>(node);
   if (shape) {
     // Highlight selected node with a different color
-    scene_graph::Vector4 originalColor;
+    Vector4 originalColor;
     bool isSelected = (selectedNode_ == node);
 
     if (isSelected) {
       originalColor = shape->getColor();
       // Adjust color to indicate selection (e.g., add a yellow tint)
-      scene_graph::Vector4 highlightColor(1.0f, 1.0f, 0.0f, originalColor.a);
+      Vector4 highlightColor(1.0f, 1.0f, 0.0f, originalColor.a);
       shape->setColor(highlightColor);
     }
 
@@ -105,7 +128,7 @@ void Canvas::renderNode(const std::shared_ptr<scene_graph::Node> &node) {
  * @return The node at the position, or nullptr if no node is at the position.
  */
 std::shared_ptr<scene_graph::Node>
-Canvas::hitTest(const scene_graph::Vector2 &position) const {
+Canvas::hitTest(const Vector2 &position) const {
   if (!root_) {
     return nullptr;
   }
@@ -125,7 +148,7 @@ Canvas::hitTest(const scene_graph::Vector2 &position) const {
 
 std::shared_ptr<scene_graph::Node>
 Canvas::hitTestRecursive(const std::shared_ptr<scene_graph::Node> &node,
-                         const scene_graph::Vector2 &position) const {
+                         const Vector2 &position) const {
 
   // check against shapes
   auto shape = std::dynamic_pointer_cast<scene_graph::Shape>(node);

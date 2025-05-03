@@ -2,7 +2,8 @@
 #define SCENE_GRAPH_SHAPE_H
 
 #include "scene_graph/node.h"
-#include "scene_graph/types.h"
+#include "types.h"
+#include <string>
 
 namespace scene_graph {
 

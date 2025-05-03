@@ -2,7 +2,7 @@
 #define SCENE_GRAPH_CIRCLE_H
 
 #include "scene_graph/shape.h"
-#include "scene_graph/types.h"
+#include "types.h"
 #include <glm/glm.hpp>
 
 namespace scene_graph {

@@ -31,11 +31,16 @@ target_include_directories(visualization_core PUBLIC
     ${CMAKE_SOURCE_DIR}/include
 )
 
+# Find FreeType package
+find_package(Freetype REQUIRED)
+include_directories(${FREETYPE_INCLUDE_DIRS})
+
 # Link OpenGL libraries to visualization_core
 target_link_libraries(visualization_core
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARY}
     glfw
+    ${FREETYPE_LIBRARIES}
 )
 
 # Link GLM to bring in its headers

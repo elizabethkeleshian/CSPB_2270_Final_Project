@@ -1,4 +1,4 @@
-#include "scene_graph/types.h"
+#include "types.h"
 #include <cmath>
 #include <gtest/gtest.h>
 

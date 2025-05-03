@@ -1,7 +1,7 @@
 #ifndef SCENE_GRAPH_TRANSFORM_H
 #define SCENE_GRAPH_TRANSFORM_H
 
-#include "scene_graph/types.h"
+#include "types.h"
 
 namespace scene_graph {
 

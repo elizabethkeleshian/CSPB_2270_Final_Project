@@ -1,7 +1,7 @@
 // File: test/scene_graph/transform_test.cpp
 
 #include "scene_graph/transform.h"
-#include "scene_graph/types.h"
+#include "types.h"
 #include "gtest/gtest.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/epsilon.hpp>

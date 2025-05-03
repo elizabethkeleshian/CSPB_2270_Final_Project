@@ -25,12 +25,14 @@ set(GLEW_LIBRARIES ${GLEW_LIBRARY})
 
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
+find_package(Freetype REQUIRED)
 
 # Include directories
 include_directories(include)
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${GLM_INCLUDE_DIRS})
+include_directories(${FREETYPE_INCLUDE_DIRS})
 
 # Find Google Test
 find_package(GTest REQUIRED)
@@ -51,6 +53,7 @@ target_link_libraries(scene_graphs_app
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARY}
     glfw
+    ${FREETYPE_LIBRARIES}
 )
 
 # Enable testing

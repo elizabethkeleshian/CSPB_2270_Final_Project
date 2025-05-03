@@ -1,7 +1,7 @@
 #ifndef VISUALIZATION_SHADER_H
 #define VISUALIZATION_SHADER_H
 
-#include "scene_graph/types.h"
+#include "types.h"
 #include <glm/glm.hpp>
 #include <string>
 
@@ -32,8 +32,8 @@ public:
   void use() const;
 
   // Uniform setters
-  void setUniform(const std::string &name, const scene_graph::Matrix4 &matrix);
-  void setUniform(const std::string &name, const scene_graph::Vector4 &color);
+  void setUniform(const std::string &name, const Matrix4 &matrix);
+  void setUniform(const std::string &name, const Vector4 &color);
   void setUniform(const std::string &name, float value);
 
 private:

@@ -1,5 +1,5 @@
 #include "scene_graph/rectangle.h"
-#include "scene_graph/types.h"
+#include "types.h"
 #include <gtest/gtest.h>
 #include <memory>
 

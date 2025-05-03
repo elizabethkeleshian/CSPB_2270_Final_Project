@@ -3,11 +3,11 @@
 #define APPLICATION_H
 
 #include "constants.h"
-#include "scene_graph/circle.h"
 #include "scene_graph/node.h"
-#include "scene_graph/rectangle.h"
+#include "types.h"
 #include "visualization/canvas.h"
 #include "visualization/renderer.h"
+#include "visualization/tree_view.h"
 #include "visualization/window.h"
 #include <memory>
 
@@ -24,6 +24,8 @@ public:
 
   bool initialize();
   void run();
+  void toggleTreeView();
+  void syncSelectionWithCanvas();
 
 private:
   // Window properties
@@ -35,19 +37,19 @@ private:
   void setupInputCallbacks();
   void handleMouseMoved(double xpos, double ypos);
   void handleMouseButton(int button, int action, int mods);
-  [[nodiscard]] scene_graph::Vector2
-  windowToSceneCoordinates(double xpos, double ypos) const;
+  [[nodiscard]] Vector2 windowToSceneCoordinates(double xpos,
+                                                 double ypos) const;
 
   // Scene graph setup
   void setupSceneGraph();
-  std::shared_ptr<scene_graph::Node>
-  createRectangle(const std::string &name, const scene_graph::Vector2 &size,
-                  const scene_graph::Vector2 &position,
-                  const scene_graph::Vector4 &color);
-  std::shared_ptr<scene_graph::Node>
-  createCircle(const std::string &name, float radius,
-               const scene_graph::Vector2 &position,
-               const scene_graph::Vector4 &color);
+  std::shared_ptr<scene_graph::Node> createRectangle(const std::string &name,
+                                                     const Vector2 &size,
+                                                     const Vector2 &position,
+                                                     const Vector4 &color);
+  std::shared_ptr<scene_graph::Node> createCircle(const std::string &name,
+                                                  float radius,
+                                                  const Vector2 &position,
+                                                  const Vector4 &color);
 
   // Animation
   void updateAnimations(float deltaTime);
@@ -61,15 +63,18 @@ private:
   // Interaction state
   bool isDragging_;
   std::shared_ptr<scene_graph::Node> draggedNode_;
-  scene_graph::Vector2 lastMousePos_;
+  Vector2 lastMousePos_;
 
   // Animation state
   float animationTime_;
 
   // Car creation
-  std::shared_ptr<scene_graph::Node>
-  createCar(const std::string &name, const scene_graph::Vector2 &position,
-            const scene_graph::Vector4 &bodyColor);
+  std::shared_ptr<scene_graph::Node> createCar(const std::string &name,
+                                               const Vector2 &position,
+                                               const Vector4 &bodyColor);
+
+  std::shared_ptr<visualization::TreeView> treeView_;
+  bool showTreeView_ = true; // Toggle for showing/hiding tree view
 };
 
 #endif // APPLICATION_H

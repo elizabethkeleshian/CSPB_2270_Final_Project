@@ -1,6 +1,7 @@
 #ifndef VISUALIZATION_RENDERER_H
 #define VISUALIZATION_RENDERER_H
 
+#include "types.h"
 #include <memory>
 #include <scene_graph/shape.h>
 
@@ -27,10 +28,17 @@ public:
   void endFrame();
   void renderShape(const scene_graph::Shape &shape);
 
+  // Text rendering
+  void drawText(const std::string &text, float x, float y,
+                const Vector4 &color);
+
   // Window management
   void setViewport(int width, int height);
 
 private:
+  // Text rendering initialization
+  bool initTextRendering();
+
   struct Impl;
   std::unique_ptr<Impl> impl_;
 };
