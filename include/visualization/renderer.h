@@ -23,6 +23,10 @@ public:
   bool initialize();
   void cleanup();
 
+  // Headless mode for testing
+  void setHeadlessMode(bool headless);
+  bool isHeadlessMode() const;
+
   // Rendering methods
   void beginFrame();
   void endFrame();
@@ -35,9 +39,18 @@ public:
   // Window management
   void setViewport(int width, int height);
 
+  // Drawing methods
+  void drawRectangle(float x, float y, float width, float height,
+                     const Vector4 &color);
+  void drawLine(float x1, float y1, float x2, float y2, const Vector4 &color,
+                float thickness = 0.02f);
+
 private:
   // Text rendering initialization
   bool initTextRendering();
+
+  // Create fallback font when system fonts are not available
+  void createFallbackFont();
 
   struct Impl;
   std::unique_ptr<Impl> impl_;

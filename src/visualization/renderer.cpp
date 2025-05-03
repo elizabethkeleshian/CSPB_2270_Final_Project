@@ -26,6 +26,7 @@ struct Renderer::Impl {
   int viewportWidth = constants::DEFAULT_VIEWPORT_WIDTH;
   int viewportHeight = constants::DEFAULT_VIEWPORT_HEIGHT;
   bool initialized = false;
+  bool headlessMode = false; // Added headless mode flag
 
   unsigned int rectangleVAO = 0;
   unsigned int circleVAO = 0;
@@ -50,6 +51,13 @@ struct Renderer::Impl {
 
 Renderer::Renderer() : impl_(std::make_unique<Impl>()) {};
 
+// Add a method to enable headless mode for testing
+void Renderer::setHeadlessMode(bool headless) {
+  impl_->headlessMode = headless;
+}
+
+bool Renderer::isHeadlessMode() const { return impl_->headlessMode; }
+
 Renderer::~Renderer() { cleanup(); }
 
 /**
@@ -62,6 +70,13 @@ Renderer::~Renderer() { cleanup(); }
  * @return true if initialization succeeded, false otherwise
  */
 bool Renderer::initialize() {
+  // If in headless mode, skip actual OpenGL initialization
+  if (impl_->headlessMode) {
+    impl_->initialized = true;
+    impl_->textInitialized = true;
+    return true;
+  }
+
   // Initialize GLEW - must happen after GL context is created
   if (glewInit() != GLEW_OK) {
     std::cerr << "Failed to initialize GLEW\n";
@@ -226,6 +241,12 @@ bool Renderer::initialize() {
 }
 
 bool Renderer::initTextRendering() {
+  // Skip actual text rendering initialization if in headless mode
+  if (impl_->headlessMode) {
+    impl_->textInitialized = true;
+    return true;
+  }
+
   // Text shader program
   const char *textVertexShaderSource = R"(
     #version 330 core
@@ -310,16 +331,30 @@ bool Renderer::initTextRendering() {
   // system
   const char *fontPath = "/System/Library/Fonts/HelveticaNeue.ttc";
   if (FT_New_Face(ft, fontPath, 0, &face)) {
-    std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
+    std::cerr << "ERROR::FREETYPE: Failed to load font " << fontPath
+              << std::endl;
     // Try a fallback font path
     fontPath = "/System/Library/Fonts/Geneva.ttf";
     if (FT_New_Face(ft, fontPath, 0, &face)) {
+      std::cerr << "ERROR::FREETYPE: Failed to load fallback font " << fontPath
+                << std::endl;
       // Try another common macOS font
       fontPath = "/System/Library/Fonts/SFNSMono.ttf";
       if (FT_New_Face(ft, fontPath, 0, &face)) {
-        std::cerr << "ERROR::FREETYPE: Failed to load fallback font"
-                  << std::endl;
-        return false;
+        std::cerr << "ERROR::FREETYPE: Failed to load fallback font "
+                  << fontPath << std::endl;
+        // Try one more common font
+        fontPath = "/System/Library/Fonts/Helvetica.ttc";
+        if (FT_New_Face(ft, fontPath, 0, &face)) {
+          std::cerr << "ERROR::FREETYPE: Failed to load all font options. "
+                       "Using embedded bitmap font"
+                    << std::endl;
+          // Skip text rendering but don't fail the initialization
+          // We'll just create a minimal character set with a default "box" for
+          // rendering
+          createFallbackFont();
+          return true;
+        }
       }
     }
   }
@@ -387,6 +422,13 @@ bool Renderer::initTextRendering() {
  * This also allows reinitialization if needed.
  */
 void Renderer::cleanup() {
+  // Skip cleanup if in headless mode
+  if (impl_->headlessMode) {
+    impl_->initialized = false;
+    impl_->textInitialized = false;
+    return;
+  }
+
   if (impl_->initialized) {
     glDeleteVertexArrays(1, &impl_->rectangleVAO);
     glDeleteVertexArrays(1, &impl_->circleVAO);
@@ -414,11 +456,21 @@ void Renderer::cleanup() {
  * our scene objects stand out visually.
  */
 void Renderer::beginFrame() {
+  // Skip if in headless mode
+  if (impl_->headlessMode) {
+    return;
+  }
+
   glClearColor(0.2F, 0.3F, 0.3F, 1.0F);
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void Renderer::endFrame() {
+  // Skip if in headless mode
+  if (impl_->headlessMode) {
+    return;
+  }
+
   // Finish any pending operations for the frame
   glFlush();
 }
@@ -426,12 +478,21 @@ void Renderer::endFrame() {
 void Renderer::setViewport(int width, int height) {
   impl_->viewportWidth = width;
   impl_->viewportHeight = height;
-  glViewport(0, 0, width, height);
+
+  // Skip actual OpenGL call if in headless mode
+  if (!impl_->headlessMode) {
+    glViewport(0, 0, width, height);
+  }
 }
 
 void Renderer::renderShape(const scene_graph::Shape &shape) {
   if (!impl_->initialized) {
     std::cerr << "Renderer not initialized!\n";
+    return;
+  }
+
+  // Skip rendering in headless mode
+  if (impl_->headlessMode) {
     return;
   }
 
@@ -505,6 +566,11 @@ void Renderer::drawText(const std::string &text, float x, float y,
     return;
   }
 
+  // Skip rendering in headless mode
+  if (impl_->headlessMode) {
+    return;
+  }
+
   // Activate text shader program
   glUseProgram(impl_->textShaderProgram);
 
@@ -569,6 +635,185 @@ void Renderer::drawText(const std::string &text, float x, float y,
   // Unbind
   glBindVertexArray(0);
   glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+/**
+ * @brief Draws a rectangle at the specified position with the given size and
+ * color
+ *
+ * This is useful for UI elements like selection highlights and backgrounds.
+ * The rectangle is drawn in screen space coordinates.
+ *
+ * @param x Left position of the rectangle
+ * @param y Top position of the rectangle
+ * @param width Width of the rectangle
+ * @param height Height of the rectangle
+ * @param color Color of the rectangle (RGBA)
+ */
+void Renderer::drawRectangle(float x, float y, float width, float height,
+                             const Vector4 &color) {
+  if (!impl_->initialized) {
+    std::cerr << "Renderer not initialized!\n";
+    return;
+  }
+
+  // Skip rendering in headless mode
+  if (impl_->headlessMode) {
+    return;
+  }
+
+  // Use our existing shader program
+  glUseProgram(impl_->shaderProgram);
+
+  // Get uniform locations
+  unsigned int modelLoc = glGetUniformLocation(impl_->shaderProgram, "model");
+  unsigned int projLoc =
+      glGetUniformLocation(impl_->shaderProgram, "projection");
+  unsigned int colorLoc = glGetUniformLocation(impl_->shaderProgram, "color");
+
+  // Create projection matrix (simple orthographic)
+  Matrix4 projection = glm::ortho(
+      -10.0f, 10.0f, -10.0f * impl_->viewportHeight / impl_->viewportWidth,
+      10.0f * impl_->viewportHeight / impl_->viewportWidth, -1.0f, 1.0f);
+
+  // Set uniform for projection
+  glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+  // Create model matrix with translation and scale
+  Matrix4 model = Matrix4(1.0f);
+  // Position at center of the rectangle
+  model = glm::translate(model,
+                         glm::vec3(x + width / 2.0f, y + height / 2.0f, 0.0f));
+  // Scale to rectangle dimensions
+  model = glm::scale(model, glm::vec3(width, height, 1.0f));
+
+  // Set model and color uniforms
+  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+  glUniform4f(colorLoc, color.r, color.g, color.b, color.a);
+
+  // Draw rectangle using the existing VAO
+  glBindVertexArray(impl_->rectangleVAO);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  glBindVertexArray(0);
+}
+
+/**
+ * @brief Draws a line between two points with the given color and thickness
+ *
+ * Used for UI elements like connecting lines in the tree view. The line
+ * is drawn as a thin rectangle oriented between the two points.
+ *
+ * @param x1 X coordinate of the first point
+ * @param y1 Y coordinate of the first point
+ * @param x2 X coordinate of the second point
+ * @param y2 Y coordinate of the second point
+ * @param color Color of the line (RGBA)
+ * @param thickness Thickness of the line (default: 0.02f)
+ */
+void Renderer::drawLine(float x1, float y1, float x2, float y2,
+                        const Vector4 &color, float thickness) {
+  if (!impl_->initialized) {
+    std::cerr << "Renderer not initialized!\n";
+    return;
+  }
+
+  // Skip rendering in headless mode
+  if (impl_->headlessMode) {
+    return;
+  }
+
+  // Calculate line length and angle
+  float dx = x2 - x1;
+  float dy = y2 - y1;
+  float length = std::sqrt(dx * dx + dy * dy);
+  float angle = std::atan2(dy, dx);
+
+  // Use our existing shader program
+  glUseProgram(impl_->shaderProgram);
+
+  // Get uniform locations
+  unsigned int modelLoc = glGetUniformLocation(impl_->shaderProgram, "model");
+  unsigned int projLoc =
+      glGetUniformLocation(impl_->shaderProgram, "projection");
+  unsigned int colorLoc = glGetUniformLocation(impl_->shaderProgram, "color");
+
+  // Create projection matrix (simple orthographic)
+  Matrix4 projection = glm::ortho(
+      -10.0f, 10.0f, -10.0f * impl_->viewportHeight / impl_->viewportWidth,
+      10.0f * impl_->viewportHeight / impl_->viewportWidth, -1.0f, 1.0f);
+
+  // Set uniform for projection
+  glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+  // Create model matrix with translation, rotation and scale
+  Matrix4 model = Matrix4(1.0f);
+  // Position at center of the line
+  model = glm::translate(model,
+                         glm::vec3((x1 + x2) / 2.0f, (y1 + y2) / 2.0f, 0.0f));
+  // Rotate to line angle (in radians)
+  model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
+  // Scale to line length and thickness
+  model = glm::scale(model, glm::vec3(length, thickness, 1.0f));
+
+  // Set model and color uniforms
+  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+  glUniform4f(colorLoc, color.r, color.g, color.b, color.a);
+
+  // Draw line using the rectangle VAO
+  glBindVertexArray(impl_->rectangleVAO);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  glBindVertexArray(0);
+}
+
+void Renderer::createFallbackFont() {
+  // Skip in headless mode
+  if (impl_->headlessMode) {
+    impl_->textInitialized = true;
+    return;
+  }
+
+  // Create a simple fallback character - just a square for each character
+  for (unsigned char c = 0; c < 128; c++) {
+    // Create a minimal character entry with a tiny texture
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // Create a small 8x8 white square
+    unsigned char buffer[64];
+    std::fill_n(buffer, 64, 255); // Fill with white
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 8, 0, GL_RED, GL_UNSIGNED_BYTE,
+                 buffer);
+
+    // Set texture options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Store character with minimal dimensions
+    Impl::Character character = {
+        texture, glm::ivec2(8, 8), // Size
+        glm::ivec2(0, 8),          // Bearing
+        8 << 6 // Advance (8 pixels, shifted by 6 bits - FreeType format)
+    };
+
+    impl_->characters.insert(std::pair<char, Impl::Character>(c, character));
+  }
+
+  // Configure VAO/VBO for text rendering
+  glGenVertexArrays(1, &impl_->textVAO);
+  glGenBuffers(1, &impl_->textVBO);
+  glBindVertexArray(impl_->textVAO);
+  glBindBuffer(GL_ARRAY_BUFFER, impl_->textVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
+  impl_->textInitialized = true;
 }
 
 } // namespace visualization

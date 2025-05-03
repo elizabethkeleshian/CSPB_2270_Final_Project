@@ -15,9 +15,9 @@ Node::Node(std::string name) : name_(std::move(name)) {}
  *
  * @param child The child node to add.
  */
-void Node::addChild(const shared_ptr<Node> &child) {
+void Node::addChild(const std::shared_ptr<Node> &child) {
   // Remove child from any existing parent
-  shared_ptr<Node> currentParent = child->parent_.lock();
+  std::shared_ptr<Node> currentParent = child->parent_.lock();
   if (currentParent) {
     // Remove from current parent
     currentParent->removeChild(child);
@@ -32,9 +32,9 @@ void Node::addChild(const shared_ptr<Node> &child) {
  *
  * @param child node to remove.
  */
-void Node::removeChild(const shared_ptr<Node> &child) {
+void Node::removeChild(const std::shared_ptr<Node> &child) {
   child->parent_.reset();
-  children_.erase(remove(children_.begin(), children_.end(), child),
+  children_.erase(std::remove(children_.begin(), children_.end(), child),
                   children_.end());
 }
 

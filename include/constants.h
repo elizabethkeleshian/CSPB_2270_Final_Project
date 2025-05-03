@@ -3,6 +3,28 @@
 #define CONSTANTS_H
 
 namespace constants {
+
+// choose colors for the UI
+namespace colors {
+// Background color (dark blue-gray)
+inline constexpr float BACKGROUND[4] = {0.15f, 0.18f, 0.22f, 1.0f};
+
+// Primary accent (vibrant blue)
+inline constexpr float PRIMARY[4] = {0.0f, 0.47f, 0.9f, 1.0f};
+
+// Secondary accent (emerald green)
+inline constexpr float SECONDARY[4] = {0.0f, 0.73f, 0.52f, 1.0f};
+
+// Highlight (amber)
+inline constexpr float HIGHLIGHT[4] = {1.0f, 0.76f, 0.03f, 1.0f};
+
+// Text (off-white)
+inline constexpr float TEXT[4] = {0.93f, 0.94f, 0.95f, 1.0f};
+
+// Alert (coral red)
+inline constexpr float ALERT[4] = {0.95f, 0.33f, 0.33f, 1.0f};
+} // namespace colors
+
 // Window settings
 inline constexpr int DEFAULT_WINDOW_WIDTH = 800;
 inline constexpr int DEFAULT_WINDOW_HEIGHT = 600;
@@ -74,8 +96,9 @@ inline constexpr float TREE_VIEW_NODE_WIDTH_ADJUST =
     10.0F; // Width adjustment factor
 
 // Text rendering settings
-inline constexpr int TEXT_FONT_SIZE = 40;  // Font size in pixels
-inline constexpr float TEXT_SCALE = 0.01F; // Text scaling factor
+inline constexpr int TEXT_FONT_SIZE = 24;   // Slightly smaller, cleaner font
+inline constexpr float TEXT_SCALE = 0.008F; // Adjusted scale
+inline constexpr float TEXT_PADDING = 0.2F; // Add some padding between items
 
 // UI colors
 inline constexpr float UI_SELECTED_COLOR[4] = {0.3F, 0.6F, 1.0F,

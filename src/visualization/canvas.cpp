@@ -129,10 +129,6 @@ void Canvas::renderNode(const std::shared_ptr<scene_graph::Node> &node) {
  */
 std::shared_ptr<scene_graph::Node>
 Canvas::hitTest(const Vector2 &position) const {
-  if (!root_) {
-    return nullptr;
-  }
-
   // first check against single shapes
   for (auto iterator = shapes_.rbegin(); iterator != shapes_.rend();
        iterator++) {
@@ -142,8 +138,12 @@ Canvas::hitTest(const Vector2 &position) const {
     }
   }
 
-  // recursively check against children nodes. Need to find the topmost node
-  return hitTestRecursive(root_, position);
+  // If not found in standalone shapes, check the scene graph
+  if (root_) {
+    return hitTestRecursive(root_, position);
+  }
+
+  return nullptr;
 }
 
 std::shared_ptr<scene_graph::Node>

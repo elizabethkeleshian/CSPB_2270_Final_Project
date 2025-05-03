@@ -52,4 +52,15 @@ TEST_F(RectangleTest, ContainsPoint_Transformed) {
   EXPECT_FALSE(rectangle->containsPoint(Vector2(3.0F, 3.0F)));
 }
 
+TEST_F(RectangleTest, ContainsPoint_WithRotation) {
+  rectangle->setSize(Vector2(2.0F, 2.0F));
+  rectangle->setPosition(Vector2(0.0F, 0.0F));
+  rectangle->setRotation(45.0F); // 45 degrees rotation
+
+  // A point that would be outside without rotation, but inside with rotation
+  EXPECT_TRUE(rectangle->containsPoint(Vector2(1.0F, 0.0F)));
+
+  // A point that would be inside without rotation, but outside with rotation
+  EXPECT_FALSE(rectangle->containsPoint(Vector2(1.0F, 1.0F)));
+}
 } // namespace scene_graph

@@ -18,36 +18,70 @@ Application::Application()
       draggedNode_(nullptr), showTreeView_(true) {}
 
 bool Application::initialize() {
-  if (!window_->create(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)) {
-    std::cerr << "Failed to create window\n";
+  try {
+    if (!window_->create(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)) {
+      std::cerr << "Failed to create window\n";
+      return false;
+    }
+    // Initialize renderer
+    try {
+      if (!renderer_->initialize()) {
+        std::cerr << "Failed to initialize renderer!\n";
+        return false;
+      }
+    } catch (const std::exception &e) {
+      std::cerr << "Exception in renderer initialization: " << e.what() << "\n";
+      return false;
+    } catch (...) {
+      std::cerr << "Unknown exception in renderer initialization\n";
+      return false;
+    }
+
+    renderer_->setViewport(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    // Initialize canvas
+    try {
+      if (!canvas_->initialize(renderer_)) {
+        std::cerr << "Failed to initialize canvas!\n";
+        return false;
+      }
+    } catch (const std::exception &e) {
+      std::cerr << "Exception in canvas initialization: " << e.what() << "\n";
+      return false;
+    } catch (...) {
+      std::cerr << "Unknown exception in canvas initialization\n";
+      return false;
+    }
+
+    treeView_->setRoot(root_);
+    treeView_->setTextRenderer(renderer_);
+
+    // Setup scene graph
+    try {
+      setupSceneGraph();
+    } catch (const std::exception &e) {
+      std::cerr << "Exception in setupSceneGraph: " << e.what() << "\n";
+      return false;
+    } catch (...) {
+      std::cerr << "Unknown exception in setupSceneGraph\n";
+      return false;
+    }
+
+    // Set the root in canvas
+    canvas_->setRoot(root_);
+
+    // Setup input callbacks
+    setupInputCallbacks();
+
+    return true;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception in application initialization: " << e.what()
+              << "\n";
+    return false;
+  } catch (...) {
+    std::cerr << "Unknown exception in application initialization\n";
     return false;
   }
-  // Initialize renderer
-  if (!renderer_->initialize()) {
-    std::cerr << "Failed to initialize renderer!\n";
-    return false;
-  }
-  renderer_->setViewport(WINDOW_WIDTH, WINDOW_HEIGHT);
-
-  // Initialize canvas
-  if (!canvas_->initialize(renderer_)) {
-    std::cerr << "Failed to initialize canvas!\n";
-    return false;
-  }
-
-  treeView_->setRoot(root_);
-  treeView_->setTextRenderer(renderer_);
-
-  // Setup scene graph
-  setupSceneGraph();
-
-  // Set the root in canvas
-  canvas_->setRoot(root_);
-
-  // Setup input callbacks
-  setupInputCallbacks();
-
-  return true;
 }
 
 void Application::toggleTreeView() { showTreeView_ = !showTreeView_; }
@@ -234,13 +268,20 @@ void Application::handleMouseButton(int button, int action, int mods) {
 }
 
 Vector2 Application::windowToSceneCoordinates(double xpos, double ypos) const {
-  float sceneX = static_cast<float>(xpos) / window_->getWidth() *
-                     constants::WINDOW_TO_SCENE_SCALE -
-                 constants::WINDOW_TO_SCENE_OFFSET_X;
-  float sceneY = constants::WINDOW_TO_SCENE_OFFSET_Y -
-                 static_cast<float>(ypos) / window_->getHeight() *
-                     constants::WINDOW_TO_SCENE_SCALE;
-  return Vector2(sceneX, sceneY);
+  // Normalize window coordinates to [-1, 1] range
+  float normalizedX =
+      (2.0f * static_cast<float>(xpos) / window_->getWidth()) - 1.0f;
+  float normalizedY =
+      1.0f - (2.0f * static_cast<float>(ypos) / window_->getHeight());
+
+  // Convert to scene coordinates with proper aspect ratio
+  float aspectRatio =
+      static_cast<float>(window_->getWidth()) / window_->getHeight();
+  float sceneWidth = constants::SCENE_WIDTH;
+  float sceneHeight = sceneWidth / aspectRatio;
+
+  return Vector2(normalizedX * (sceneWidth / 2.0f),
+                 normalizedY * (sceneHeight / 2.0f));
 }
 
 void Application::setupSceneGraph() {
@@ -344,30 +385,69 @@ void Application::updateAnimations(float deltaTime) {
 }
 
 void Application::run() {
-  // Timing variables
-  float lastFrameTime = 0.0f;
+  try {
+    // Timing variables
+    float lastFrameTime = 0.0f;
 
-  // Main loop
-  while (!window_->shouldClose()) {
-    // Update time and calculate delta time
-    float currentTime = static_cast<float>(glfwGetTime());
-    float deltaTime = currentTime - lastFrameTime;
-    lastFrameTime = currentTime;
+    // Main loop
+    while (!window_->shouldClose()) {
+      try {
+        // Update time and calculate delta time
+        float currentTime = static_cast<float>(glfwGetTime());
+        float deltaTime = currentTime - lastFrameTime;
+        lastFrameTime = currentTime;
 
-    // Update animations
-    updateAnimations(deltaTime);
+        try {
+          // Update animations
+          updateAnimations(deltaTime);
+        } catch (const std::exception &e) {
+          std::cerr << "Exception in updateAnimations: " << e.what() << "\n";
+          break;
+        } catch (...) {
+          std::cerr << "Unknown exception in updateAnimations\n";
+          break;
+        }
 
-    // Render
-    canvas_->render();
+        try {
+          // Render
+          canvas_->render();
+        } catch (const std::exception &e) {
+          std::cerr << "Exception in canvas rendering: " << e.what() << "\n";
+          break;
+        } catch (...) {
+          std::cerr << "Unknown exception in canvas rendering\n";
+          break;
+        }
 
-    // Render tree view if enabled
-    if (showTreeView_) {
-      treeView_->render();
+        // Render tree view if enabled
+        if (showTreeView_) {
+          try {
+            treeView_->render();
+          } catch (const std::exception &e) {
+            std::cerr << "Exception in tree view rendering: " << e.what()
+                      << "\n";
+            break;
+          } catch (...) {
+            std::cerr << "Unknown exception in tree view rendering\n";
+            break;
+          }
+        }
+
+        // Swap buffers and poll events
+        window_->swapBuffers();
+        window_->pollEvents();
+      } catch (const std::exception &e) {
+        std::cerr << "Exception in main loop: " << e.what() << "\n";
+        break;
+      } catch (...) {
+        std::cerr << "Unknown exception in main loop\n";
+        break;
+      }
     }
-
-    // Swap buffers and poll events
-    window_->swapBuffers();
-    window_->pollEvents();
+  } catch (const std::exception &e) {
+    std::cerr << "Exception in run method: " << e.what() << "\n";
+  } catch (...) {
+    std::cerr << "Unknown exception in run method\n";
   }
 }
 

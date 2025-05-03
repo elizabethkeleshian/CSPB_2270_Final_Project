@@ -38,10 +38,6 @@ void TreeView::renderNode(const std::shared_ptr<scene_graph::Node> &node,
 
   // Calculate position for this node
   int xPosition = 10 + depth * INDENT_SIZE;
-
-  // Convert screen space to scene space
-  // These conversion factors may need adjustment based on your viewport
-  // settings
   float sceneX = constants::TREE_VIEW_X_OFFSET +
                  ((float)xPosition / constants::TREE_VIEW_X_SCALE);
   float sceneY = constants::TREE_VIEW_Y_OFFSET -
@@ -58,12 +54,45 @@ void TreeView::renderNode(const std::shared_ptr<scene_graph::Node> &node,
   // Determine if this node is selected
   bool isSelected = (node == selectedNode_);
 
-  // Draw node name text
+  // Draw selection background if selected
+  if (isSelected && textRenderer_) {
+    // Draw a background rectangle for selected item
+    Vector4 bgColor(0.25f, 0.27f, 0.32f,
+                    1.0f); // Slightly lighter than background
+
+    // Calculate background rectangle size based on text
+    float textWidth = node->getName().length() * 0.15f; // Approximate width
+    float rectX = sceneX - 0.1f;                        // Slight padding
+    float rectY = sceneY - 0.1f;
+    float rectWidth = textWidth + 0.2f;
+    float rectHeight = 0.2f;
+
+    // Draw rectangle
+    renderer_->drawRectangle(rectX, rectY, rectWidth, rectHeight, bgColor);
+  }
+
+  // Draw line indicators for hierarchy
+  if (depth > 0 && textRenderer_) {
+    Vector4 lineColor(0.4f, 0.4f, 0.4f, 1.0f); // Subtle gray
+
+    // Draw vertical line
+    float lineX = sceneX - INDENT_SIZE / constants::TREE_VIEW_X_SCALE;
+    float lineY = sceneY;
+
+    // Simple line rendering
+    renderer_->drawLine(lineX, lineY - 0.1f, lineX, lineY, lineColor);
+    renderer_->drawLine(lineX, lineY, sceneX - 0.2f, lineY, lineColor);
+  }
+
+  // Draw text with appropriate color
   if (textRenderer_) {
-    Vector4 textColor = isSelected ? Vector4(0.3f, 0.6f, 1.0f, 1.0f)
-                                   : // Blue for selected
-                            Vector4(0.8f, 0.8f, 0.8f,
-                                    1.0f); // White for unselected
+    Vector4 textColor =
+        isSelected
+            ? Vector4(
+                  constants::colors::PRIMARY[0], constants::colors::PRIMARY[1],
+                  constants::colors::PRIMARY[2], constants::colors::PRIMARY[3])
+            : Vector4(constants::colors::TEXT[0], constants::colors::TEXT[1],
+                      constants::colors::TEXT[2], constants::colors::TEXT[3]);
 
     textRenderer_->drawText(node->getName(), sceneX, sceneY, textColor);
   }

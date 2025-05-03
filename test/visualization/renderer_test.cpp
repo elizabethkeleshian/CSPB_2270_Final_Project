@@ -10,7 +10,11 @@ namespace visualization {
 
 class RendererTest : public ::testing::Test {
 protected:
-  void SetUp() override { renderer = std::make_shared<Renderer>(); }
+  void SetUp() override {
+    renderer = std::make_shared<Renderer>();
+    // Enable headless mode for testing without OpenGL context
+    renderer->setHeadlessMode(true);
+  }
 
   std::shared_ptr<Renderer> renderer;
 };
@@ -60,6 +64,40 @@ TEST_F(RendererTest, RenderShape_Circle) {
 TEST_F(RendererTest, Cleanup_Success) {
   renderer->initialize();
   EXPECT_NO_THROW(renderer->cleanup());
+}
+
+TEST_F(RendererTest, DrawRectangle_Success) {
+  renderer->initialize();
+  Vector4 color(0.5f, 0.6f, 0.7f, 0.8f);
+  EXPECT_NO_THROW(renderer->drawRectangle(-1.0f, -1.0f, 2.0f, 2.0f, color));
+}
+
+TEST_F(RendererTest, DrawLine_Success) {
+  renderer->initialize();
+  Vector4 color(0.1f, 0.2f, 0.3f, 0.4f);
+  EXPECT_NO_THROW(renderer->drawLine(-1.0f, -1.0f, 1.0f, 1.0f, color));
+}
+
+// Test drawing at various angles
+TEST_F(RendererTest, DrawLine_VariousAngles) {
+  renderer->initialize();
+  Vector4 color(0.1f, 0.2f, 0.3f, 0.4f);
+
+  // Horizontal line
+  EXPECT_NO_THROW(renderer->drawLine(-1.0f, 0.0f, 1.0f, 0.0f, color));
+
+  // Vertical line
+  EXPECT_NO_THROW(renderer->drawLine(0.0f, -1.0f, 0.0f, 1.0f, color));
+
+  // Diagonal lines
+  EXPECT_NO_THROW(renderer->drawLine(-1.0f, -1.0f, 1.0f, 1.0f, color));
+  EXPECT_NO_THROW(renderer->drawLine(-1.0f, 1.0f, 1.0f, -1.0f, color));
+
+  // Short line
+  EXPECT_NO_THROW(renderer->drawLine(0.0f, 0.0f, 0.1f, 0.1f, color));
+
+  // Zero-length line (should not crash)
+  EXPECT_NO_THROW(renderer->drawLine(0.0f, 0.0f, 0.0f, 0.0f, color));
 }
 
 } // namespace visualization
