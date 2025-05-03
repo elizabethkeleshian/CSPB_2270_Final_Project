@@ -5,6 +5,7 @@
 
 namespace scene_graph {
 using namespace std;
+using std::make_shared;
 
 class NodeTest : public ::testing::Test {
 protected:

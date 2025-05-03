@@ -8,9 +8,10 @@ add_executable(scene_graphs_tests
     scene_graph/rectangle_test.cpp
     scene_graph/circle_test.cpp
     visualization/canvas_test.cpp
-   # visualization/tree_view_test.cpp
-    #visualization/shader_test.cpp
+    visualization/tree_view_test.cpp
+    visualization/shader_test.cpp
     visualization/renderer_test.cpp
+    visualization/window_test.cpp
 )
 
 # Link test executable with libraries

@@ -20,6 +20,11 @@ add_library(visualization_core
     visualization/shader.cpp
     visualization/renderer.cpp
     visualization/window.cpp
+    visualization/shape_renderer.cpp
+    visualization/text_renderer.cpp
+    visualization/font_manager.cpp
+    visualization/shader_manager.cpp
+    visualization/render_types.cpp
 )
 
 # Include directories
