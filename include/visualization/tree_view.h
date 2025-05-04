@@ -53,6 +53,7 @@ private:
     std::shared_ptr<scene_graph::Node> node;
     int x;
     int y;
+    int width;
     int height;
   };
 

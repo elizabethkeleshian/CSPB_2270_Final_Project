@@ -63,6 +63,8 @@ void Canvas::selectNode(const std::shared_ptr<scene_graph::Node> &node) {
       shape->setColor(highlightColor);
     }
   }
+  std::cout << "Selected node: " << (node ? node->getName() : "none")
+            << std::endl;
 }
 
 std::shared_ptr<scene_graph::Node> Canvas::getSelectedNode() const {
@@ -154,15 +156,17 @@ Canvas::hitTestRecursive(const std::shared_ptr<scene_graph::Node> &node,
 
   // check against shapes
   auto shape = std::dynamic_pointer_cast<scene_graph::Shape>(node);
-  if (shape && shape->containsPoint(position)) {
-    return shape;
+
+  if (shape) {
+    if (shape->containsPoint(position)) {
+      return shape;
+    }
   }
 
   // check against children nodes
   const auto &children = node->getChildren();
-  for (auto iterator = children.rbegin(); iterator != children.rend();
-       iterator++) {
-    auto result = hitTestRecursive(*iterator, position);
+  for (auto it = children.rbegin(); it != children.rend(); ++it) {
+    auto result = hitTestRecursive(*it, position);
     if (result) {
       return result;
     }

@@ -195,8 +195,10 @@ void Application::handleMouseButton(int button, int action, int mods) {
     Vector2 mousePos = windowToSceneCoordinates(xpos, ypos);
 
     // Add debugging
-    std::cout << "Mouse clicked at: (" << mousePos.x << ", " << mousePos.y
-              << ")\n";
+    std::cout << "Mouse clicked at window: (" << xpos << ", " << ypos << ")"
+              << std::endl;
+    std::cout << "Converted to scene: (" << mousePos.x << ", " << mousePos.y
+              << ")" << std::endl;
 
     // Check if click is in tree view area (left side of screen)
     // In handleMouseButton method
@@ -277,20 +279,26 @@ void Application::handleMouseButton(int button, int action, int mods) {
 }
 
 Vector2 Application::windowToSceneCoordinates(double xpos, double ypos) const {
-  // Normalize window coordinates to [-1, 1] range
-  float normalizedX =
-      (2.0f * static_cast<float>(xpos) / window_->getWidth()) - 1.0f;
-  float normalizedY =
-      1.0f - (2.0f * static_cast<float>(ypos) / window_->getHeight());
+  // Convert directly from pixel coordinates to scene coordinates
+  float sceneX = ((float)xpos / window_->getWidth() * constants::SCENE_WIDTH) -
+                 constants::SCENE_HALF_WIDTH;
+  float sceneY = constants::SCENE_HALF_HEIGHT -
+                 ((float)ypos / window_->getHeight() * constants::SCENE_HEIGHT);
+  return Vector2(sceneX, sceneY);
+  // // Normalize window coordinates to [-1, 1] range
+  // float normalizedX =
+  //     (2.0f * static_cast<float>(xpos) / window_->getWidth()) - 1.0f;
+  // float normalizedY =
+  //     1.0f - (2.0f * static_cast<float>(ypos) / window_->getHeight());
 
-  // Convert to scene coordinates with proper aspect ratio
-  float aspectRatio =
-      static_cast<float>(window_->getWidth()) / window_->getHeight();
-  float sceneWidth = constants::SCENE_WIDTH;
-  float sceneHeight = sceneWidth / aspectRatio;
+  // // Convert to scene coordinates with proper aspect ratio
+  // float aspectRatio =
+  //     static_cast<float>(window_->getWidth()) / window_->getHeight();
+  // float sceneWidth = constants::SCENE_WIDTH;
+  // float sceneHeight = sceneWidth / aspectRatio;
 
-  return Vector2(normalizedX * (sceneWidth / 2.0f),
-                 normalizedY * (sceneHeight / 2.0f));
+  // return Vector2(normalizedX * (sceneWidth / 2.0f),
+  //                normalizedY * (sceneHeight / 2.0f));
 }
 
 void Application::setupSceneGraph() {
@@ -330,67 +338,69 @@ Application::createCircle(const std::string &name, float radius,
 }
 
 void Application::updateAnimations(float deltaTime) {
-  // Update animation time
-  animationTime_ += deltaTime;
+  // // Update animation time
+  // animationTime_ += deltaTime;
 
-  // Find cars by name
-  for (const auto &child : root_->getChildren()) {
-    if (child->getName() == "RedCar") {
-      // Move the red car in a circle
-      float radius = constants::RED_CAR_CIRCLE_RADIUS;
-      float speed = constants::RED_CAR_MOVEMENT_SPEED;
-      child->setPosition(Vector2(cos(animationTime_ * speed) * radius,
-                                 sin(animationTime_ * speed) * radius));
+  // // Find cars by name
+  // for (const auto &child : root_->getChildren()) {
+  //   if (child->getName() == "RedCar") {
+  //     // Move the red car in a circle
+  //     float radius = constants::RED_CAR_CIRCLE_RADIUS;
+  //     float speed = constants::RED_CAR_MOVEMENT_SPEED;
+  //     child->setPosition(Vector2(cos(animationTime_ * speed) * radius,
+  //                                sin(animationTime_ * speed) * radius));
 
-      // Rotate the car to face the direction of movement
-      float angle =
-          atan2(sin(animationTime_ * speed), cos(animationTime_ * speed));
-      angle =
-          angle * 180.0f / M_PI +
-          constants::CAR_ROTATION_ADJUSTMENT; // Convert to degrees and adjust
-      child->setRotation(angle);
+  //     // Rotate the car to face the direction of movement
+  //     float angle =
+  //         atan2(sin(animationTime_ * speed), cos(animationTime_ * speed));
+  //     angle =
+  //         angle * 180.0f / M_PI +
+  //         constants::CAR_ROTATION_ADJUSTMENT; // Convert to degrees and
+  //         adjust
+  //     child->setRotation(angle);
 
-      // Find the body to update the wheels
-      for (const auto &carPart : child->getChildren()) {
-        if (carPart->getName() == "RedCar_Body") {
-          // Rotate wheels
-          for (const auto &bodyPart : carPart->getChildren()) {
-            if (bodyPart->getName().find("Wheel") != std::string::npos) {
-              float currentRotation = bodyPart->getRotation();
-              bodyPart->setRotation(currentRotation +
-                                    constants::WHEEL_ROTATION_SPEED *
-                                        deltaTime);
-            }
-          }
-        }
-      }
-    } else if (child->getName() == "BlueCar") {
-      // Move the blue car back and forth
-      float xPos = constants::BLUE_CAR_OSCILLATION_CENTER +
-                   sin(animationTime_ * constants::CAR_MOVEMENT_SPEED) *
-                       constants::BLUE_CAR_OSCILLATION_AMPLITUDE;
-      child->setPosition(Vector2(xPos, 0.0f));
+  //     // Find the body to update the wheels
+  //     for (const auto &carPart : child->getChildren()) {
+  //       if (carPart->getName() == "RedCar_Body") {
+  //         // Rotate wheels
+  //         for (const auto &bodyPart : carPart->getChildren()) {
+  //           if (bodyPart->getName().find("Wheel") != std::string::npos) {
+  //             float currentRotation = bodyPart->getRotation();
+  //             bodyPart->setRotation(currentRotation +
+  //                                   constants::WHEEL_ROTATION_SPEED *
+  //                                       deltaTime);
+  //           }
+  //         }
+  //       }
+  //     }
+  //   } else if (child->getName() == "BlueCar") {
+  //     // Move the blue car back and forth
+  //     float xPos = constants::BLUE_CAR_OSCILLATION_CENTER +
+  //                  sin(animationTime_ * constants::CAR_MOVEMENT_SPEED) *
+  //                      constants::BLUE_CAR_OSCILLATION_AMPLITUDE;
+  //     child->setPosition(Vector2(xPos, 0.0f));
 
-      // Rotate wheels (speed depends on movement direction)
-      float wheelDirection =
-          -cos(animationTime_ * constants::CAR_MOVEMENT_SPEED);
+  //     // Rotate wheels (speed depends on movement direction)
+  //     float wheelDirection =
+  //         -cos(animationTime_ * constants::CAR_MOVEMENT_SPEED);
 
-      // Find the body to update the wheels
-      for (const auto &carPart : child->getChildren()) {
-        if (carPart->getName() == "BlueCar_Body") {
-          // Rotate wheels
-          for (const auto &bodyPart : carPart->getChildren()) {
-            if (bodyPart->getName().find("Wheel") != std::string::npos) {
-              float currentRotation = bodyPart->getRotation();
-              bodyPart->setRotation(
-                  currentRotation +
-                  wheelDirection * constants::WHEEL_ROTATION_SPEED * deltaTime);
-            }
-          }
-        }
-      }
-    }
-  }
+  //     // Find the body to update the wheels
+  //     for (const auto &carPart : child->getChildren()) {
+  //       if (carPart->getName() == "BlueCar_Body") {
+  //         // Rotate wheels
+  //         for (const auto &bodyPart : carPart->getChildren()) {
+  //           if (bodyPart->getName().find("Wheel") != std::string::npos) {
+  //             float currentRotation = bodyPart->getRotation();
+  //             bodyPart->setRotation(
+  //                 currentRotation +
+  //                 wheelDirection * constants::WHEEL_ROTATION_SPEED *
+  //                 deltaTime);
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 }
 
 void Application::run() {
@@ -411,8 +421,6 @@ void Application::run() {
         auto currentTime = static_cast<float>(glfwGetTime());
         float deltaTime = currentTime - lastFrameTime;
         lastFrameTime = currentTime;
-
-        std::cout << "Delta time: " << deltaTime << std::endl;
 
         try {
           // Update animations

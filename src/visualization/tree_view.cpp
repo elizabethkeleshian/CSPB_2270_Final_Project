@@ -24,7 +24,28 @@ void TreeView::render() {
   // Clear node positions for hit testing
   nodePositions_.clear();
 
-  // Start rendering from the top left corner with the constant Y position
+  // Draw a background for the tree view
+  float treeWidth = constants::TREE_VIEW_WIDTH;
+  float treeHeight = constants::SCENE_HEIGHT;
+  float treeX = -constants::SCENE_HALF_WIDTH;
+  float treeY = -constants::SCENE_HALF_HEIGHT;
+
+  // Draw background
+  Vector4 bgColor(0.12F, 0.14F, 0.17F,
+                  1.0F); // Slightly darker than main background
+  renderer_->drawRectangle(treeX, treeY, treeWidth, treeHeight, bgColor);
+
+  // Draw a title for the tree view
+  Vector4 titleColor(1.0F, 1.0F, 1.0F, 1.0F);
+  float titleY = constants::SCENE_HALF_HEIGHT - 0.8F;
+  renderer_->drawText("Scene Hierarchy", treeX + 0.5F, titleY, titleColor);
+
+  // Add a separator line
+  Vector4 lineColor(0.4F, 0.4F, 0.5F, 0.8F);
+  float separatorY = titleY - 0.4F;
+  renderer_->drawLine(treeX + 0.2F, separatorY, treeX + treeWidth - 0.5F,
+                      separatorY, lineColor, 0.02F);
+
   int yPosition = constants::TREE_VIEW_STARTING_Y;
 
   // Render all nodes in the tree recursively
@@ -33,78 +54,86 @@ void TreeView::render() {
 
 void TreeView::renderNode(const std::shared_ptr<scene_graph::Node> &node,
                           int depth, int &yPosition) {
-  if (!node) {
+  if (!node || !renderer_) {
     return;
   }
 
-  if (!renderer_) {
-    std::cout << "Renderer is null" << std::endl;
-    return;
-  }
+  // Constants for better layout
+  const float baseX =
+      -constants::SCENE_HALF_WIDTH + 0.5F; // Starting X position
+  const float indentSize = 0.6f;           // Indent for children (scene space)
+  const float nodeHeight = 0.6f;      // Taller nodes for better clickability
+  const float verticalSpacing = 0.7f; // Space between nodes
 
   // Calculate position for this node
-  int xPosition = 10 + depth * INDENT_SIZE;
-  float sceneX = constants::TREE_VIEW_X_OFFSET +
-                 ((float)xPosition / constants::TREE_VIEW_X_SCALE);
-  float sceneY = constants::TREE_VIEW_Y_OFFSET -
-                 ((float)yPosition / constants::TREE_VIEW_Y_SCALE);
+  float sceneX = baseX + (depth * indentSize);
+  float sceneY =
+      constants::SCENE_HALF_HEIGHT - 1.5f - (yPosition * verticalSpacing);
 
-  // Store node position for hit testing
+  // Make sure we don't exceed tree view width
+  float treeViewWidth = constants::TREE_VIEW_WIDTH;
+  float maxTextWidth = treeViewWidth - (depth * indentSize) -
+                       1.0f; // Subtract padding and indentation
+
+  // Calculate node dimensions with constraint on width
+  float textWidth =
+      std::min(node->getName().length() * 0.2f + 0.4f, maxTextWidth);
+
+  // Store node position for hit testing (in scene coordinates)
   NodePosition pos;
   pos.node = node;
-  pos.x = xPosition;
-  pos.y = yPosition;
-  pos.height = NODE_HEIGHT;
+  pos.x = sceneX;
+  pos.y = sceneY;
+  pos.width = textWidth;
+  pos.height = nodeHeight;
   nodePositions_.push_back(pos);
 
   // Determine if this node is selected
   bool isSelected = (node == selectedNode_);
 
-  // Draw selection background if selected
-  if (isSelected && textRenderer_) {
-    // Draw a background rectangle for selected item
-    Vector4 bgColor(0.25f, 0.27f, 0.32f,
-                    1.0f); // Slightly lighter than background
+  // Draw node background - always draw a background for better clickability
+  Vector4 bgColor =
+      isSelected ? Vector4(0.3F, 0.6F, 1.0F, 0.5F)
+                 :                           // Highlighted blue for selected
+          Vector4(0.2F, 0.22F, 0.25F, 0.7F); // Dark gray for normal
 
-    // Calculate background rectangle size based on text
-    float textWidth = node->getName().length() * 0.15f; // Approximate width
-    float rectX = sceneX - 0.1f;                        // Slight padding
-    float rectY = sceneY - 0.1f;
-    float rectWidth = textWidth + 0.2f;
-    float rectHeight = 0.2f;
+  // Calculate background rectangle
+  float rectHeight = nodeHeight;
+  renderer_->drawRectangle(sceneX, sceneY - 0.25f, pos.width, rectHeight,
+                           bgColor);
 
-    // Draw rectangle
-    renderer_->drawRectangle(rectX, rectY, rectWidth, rectHeight, bgColor);
+  // Draw connection lines
+  if (depth > 0) {
+    Vector4 lineColor(0.6f, 0.6f, 0.6f, 0.8f); // Brighter, more visible lines
+
+    // Horizontal connector to this node
+    float parentX = baseX + ((depth - 1) * indentSize);
+    float lineStartX =
+        parentX + 0.5f; // Start halfway into the parent's text area
+    renderer_->drawLine(lineStartX, sceneY, sceneX - 0.1f, sceneY, lineColor,
+                        0.02f);
+
+    // Don't draw vertical lines for every child - that gets messy
+    // Instead, draw one vertical line from the parent down to this node's level
+    auto parent = node->getParent().lock();
+    if (parent && !parent->getChildren().empty() &&
+        node == parent->getChildren().front()) {
+      // For first child, draw vertical line from parent
+      float parentY = sceneY + verticalSpacing; // Approximate parent position
+      renderer_->drawLine(lineStartX, parentY, lineStartX, sceneY, lineColor,
+                          0.02f);
+    }
   }
 
-  // Draw line indicators for hierarchy
-  if (depth > 0 && textRenderer_) {
-    Vector4 lineColor(0.4f, 0.4f, 0.4f, 1.0f); // Subtle gray
+  // Draw the text
+  Vector4 textColor =
+      isSelected ? Vector4(1.0f, 1.0f, 1.0f, 1.0f) : // White for selected
+          Vector4(0.9f, 0.9f, 0.9f, 0.9f);           // Light gray for normal
 
-    // Draw vertical line
-    float lineX = sceneX - INDENT_SIZE / constants::TREE_VIEW_X_SCALE;
-    float lineY = sceneY;
-
-    // Simple line rendering
-    renderer_->drawLine(lineX, lineY - 0.1f, lineX, lineY, lineColor);
-    renderer_->drawLine(lineX, lineY, sceneX - 0.2f, lineY, lineColor);
-  }
-
-  // Draw text with appropriate color
-  if (textRenderer_) {
-    Vector4 textColor =
-        isSelected
-            ? Vector4(
-                  constants::colors::PRIMARY[0], constants::colors::PRIMARY[1],
-                  constants::colors::PRIMARY[2], constants::colors::PRIMARY[3])
-            : Vector4(constants::colors::TEXT[0], constants::colors::TEXT[1],
-                      constants::colors::TEXT[2], constants::colors::TEXT[3]);
-
-    textRenderer_->drawText(node->getName(), sceneX, sceneY, textColor);
-  }
+  renderer_->drawText(node->getName(), sceneX + 0.2f, sceneY, textColor);
 
   // Update yPosition for the next node
-  yPosition += NODE_HEIGHT;
+  yPosition += 1;
 
   // Recursively render all children
   for (const auto &child : node->getChildren()) {
@@ -128,26 +157,17 @@ int TreeView::countNodes(const std::shared_ptr<scene_graph::Node> &node) const {
 }
 
 void TreeView::selectAt(const Vector2 &position) {
-  // Convert scene space to screen space using constants
-  float screenX = (position.x + constants::TREE_VIEW_SCREEN_X_OFFSET) *
-                  constants::TREE_VIEW_SCREEN_X_FACTOR;
-  float screenY = (constants::TREE_VIEW_SCREEN_Y_OFFSET - position.y) *
-                  constants::TREE_VIEW_SCREEN_Y_FACTOR;
-
-  // Check if the position is within any node's area
   for (const auto &nodePos : nodePositions_) {
-    float nodeWidth =
-        constants::TREE_VIEW_NODE_WIDTH_BASE -
-        (nodePos.x - 10) / INDENT_SIZE * constants::TREE_VIEW_NODE_WIDTH_ADJUST;
+    // Check if the point is inside the node's rectangle
+    if (position.x >= nodePos.x && position.x <= nodePos.x + nodePos.width &&
+        position.y >= nodePos.y - nodePos.height / 2 &&
+        position.y <= nodePos.y + nodePos.height / 2) {
 
-    if (screenX >= nodePos.x && screenX <= nodePos.x + nodeWidth &&
-        screenY >= nodePos.y && screenY <= nodePos.y + nodePos.height) {
       selectedNode_ = nodePos.node;
       return;
     }
   }
-
-  // If we get here, no node was clicked in the tree view
+  // No node was clicked
 }
 
 std::shared_ptr<scene_graph::Node> TreeView::getSelectedNode() const {

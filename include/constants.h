@@ -81,7 +81,7 @@ inline constexpr float TREE_VIEW_Y_SCALE = 15.0F;  // Y scaling factor
 inline constexpr float TREE_VIEW_WIDTH =
     SCENE_WIDTH * 0.25F; // Width of tree view area
 inline constexpr int TREE_VIEW_STARTING_Y =
-    20; // Initial Y position for tree view
+    3; // Initial Y position for tree view
 inline constexpr float TREE_VIEW_SCREEN_X_FACTOR =
     50.0F; // Screen to scene X scale factor
 inline constexpr float TREE_VIEW_SCREEN_Y_FACTOR =
@@ -108,9 +108,9 @@ inline constexpr float UI_NORMAL_COLOR[4] = {0.8F, 0.8F, 0.8F,
 
 // Starting positions for cars
 inline constexpr float RED_CAR_START_X = -6.0F;
-inline constexpr float RED_CAR_START_Y = 3.0F;
+inline constexpr float RED_CAR_START_Y = 5.0F;
 inline constexpr float BLUE_CAR_START_X = 6.0F;
-inline constexpr float BLUE_CAR_START_Y = -3.0F;
+inline constexpr float BLUE_CAR_START_Y = -5.0F;
 
 // Coordinate conversion
 inline constexpr float WINDOW_TO_SCENE_SCALE = 20.0F;
