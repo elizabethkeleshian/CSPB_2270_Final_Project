@@ -144,10 +144,15 @@ void Application::handleMouseMoved(double xpos, double ypos) {
     bool isCarBody = draggedNode_->getName().find("Body") != std::string::npos;
 
     if (isTopLevelCar || isCarBody) {
-      // Calculate a rotation factor based on horizontal movement
+      // Calculate the total movement distance (considering both x and y)
+      float movementDistance = std::sqrt(delta.x * delta.x + delta.y * delta.y);
+
+      // Determine direction from the sign of the x delta
+      float direction = delta.x >= 0 ? 1.0f : -1.0f;
+
+      // Calculate rotation factor based on movement distance and direction
       float rotationFactor =
-          delta.x *
-          constants::WHEEL_ROTATION_FACTOR; // Using constant from constants.h
+          movementDistance * direction * constants::WHEEL_ROTATION_FACTOR;
 
       // Apply rotation to wheel children - need to traverse the hierarchy
       // correctly
@@ -547,6 +552,28 @@ Application::createCar(const std::string &name, const Vector2 &position,
           constants::colors::CAR_HUBCAP[0], constants::colors::CAR_HUBCAP[1],
           constants::colors::CAR_HUBCAP[2], constants::colors::CAR_HUBCAP[3]));
 
+  // Add wheel markers to make rotation visible
+  // Create a single spoke for each wheel
+
+  // Color for wheel spoke
+  Vector4 redSpoke(1.0f, 0.2f, 0.2f, 1.0f); // Red
+
+  // Front wheel spoke - vertical only
+  auto frontWheelMarker = createRectangle(
+      name + "_FrontWheelMarker",
+      Vector2(constants::CAR_WHEEL_RADIUS * 0.15f,
+              constants::CAR_WHEEL_RADIUS * 0.8f),
+      Vector2(0.0f, constants::CAR_WHEEL_RADIUS * 0.4f), // Offset from center
+      redSpoke);
+
+  // Rear wheel spoke - vertical only
+  auto rearWheelMarker = createRectangle(
+      name + "_RearWheelMarker",
+      Vector2(constants::CAR_WHEEL_RADIUS * 0.15f,
+              constants::CAR_WHEEL_RADIUS * 0.8f),
+      Vector2(0.0f, constants::CAR_WHEEL_RADIUS * 0.4f), // Offset from center
+      redSpoke);
+
   // Setup hierarchy
   car->addChild(carBody); // Attach body to car
   carBody->addChild(carRoof);
@@ -554,6 +581,10 @@ Application::createCar(const std::string &name, const Vector2 &position,
   carBody->addChild(rearWheel);
   frontWheel->addChild(frontHubcap);
   rearWheel->addChild(rearHubcap);
+
+  // Add single wheel marker to each wheel
+  frontWheel->addChild(frontWheelMarker);
+  rearWheel->addChild(rearWheelMarker);
 
   return car;
 }

@@ -167,11 +167,11 @@ inline constexpr float TREE_VIEW_SCREEN_Y_OFFSET = 4.0f;
 /// Tree view title Y offset from top
 inline constexpr float TREE_VIEW_TITLE_OFFSET_Y = 0.02f;
 /// Tree view separator Y offset from title
-inline constexpr float TREE_VIEW_SEPARATOR_OFFSET = 0.2f;
+inline constexpr float TREE_VIEW_SEPARATOR_OFFSET = 0.02f;
 /// Tree view title padding
 inline constexpr float TREE_VIEW_TITLE_PADDING = 0.1f;
 /// Tree view separator padding
-inline constexpr float TREE_VIEW_SEPARATOR_PADDING = 0.2f;
+inline constexpr float TREE_VIEW_SEPARATOR_PADDING = 0.15f;
 /// Space between elements in tree view
 inline constexpr float TREE_VIEW_ELEMENT_PADDING = 0.2f;
 /// Node vertical centering offset
