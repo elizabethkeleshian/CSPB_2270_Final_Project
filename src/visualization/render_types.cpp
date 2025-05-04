@@ -7,8 +7,8 @@ namespace visualization {
 
 // Add a dummy function to avoid "no symbols" error
 bool initializeRenderTypes() {
-  // Nothing to initialize, this function exists only to create a symbol
-  return true;
+    // Nothing to initialize, this function exists only to create a symbol
+    return true;
 }
 
-} // namespace visualization
+}  // namespace visualization

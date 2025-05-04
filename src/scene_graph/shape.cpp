@@ -1,4 +1,5 @@
 #include "scene_graph/shape.h"
+
 #include "types.h"
 
 namespace scene_graph {
@@ -13,7 +14,8 @@ namespace scene_graph {
  *
  * @param name Unique identifier for the shape, used in the scene hierarchy
  */
-Shape::Shape(std::string name) : Node(std::move(name)) {}
+Shape::Shape(std::string name) : Node(std::move(name)) {
+}
 
 /**
  * @brief Sets the color of the shape
@@ -25,13 +27,17 @@ Shape::Shape(std::string name) : Node(std::move(name)) {}
  *
  * @param color Vector4 containing RGBA values
  */
-void Shape::setColor(const Vector4 &color) { color_ = color; }
+void Shape::setColor(const Vector4& color) {
+    color_ = color;
+}
 
 /**
  * @brief Gets the current color of the shape
  *
  * @return RGBA color as Vector4 (each component in range 0.0-1.0)
  */
-const Vector4 &Shape::getColor() const { return color_; }
+const Vector4& Shape::getColor() const {
+    return color_;
+}
 
-} // namespace scene_graph
+}  // namespace scene_graph

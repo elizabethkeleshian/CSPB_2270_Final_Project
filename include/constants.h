@@ -62,7 +62,7 @@ inline constexpr float BLUE_CAR[4] = {0.2f, 0.4f, 0.8f, 1.0f};
 inline constexpr float CAR_WHEEL[4] = {0.2f, 0.2f, 0.2f, 1.0f};
 /// Car hubcap color (silver)
 inline constexpr float CAR_HUBCAP[4] = {0.8f, 0.8f, 0.8f, 1.0f};
-} // namespace colors
+}  // namespace colors
 
 /**
  * @brief Window and viewport settings
@@ -72,10 +72,10 @@ inline constexpr int DEFAULT_WINDOW_WIDTH = 800;
 /// Default window height in pixels
 inline constexpr int DEFAULT_WINDOW_HEIGHT = 600;
 /// Window aspect ratio
-inline constexpr float ASPECT_RATIO = static_cast<float>(DEFAULT_WINDOW_WIDTH) /
-                                      static_cast<float>(DEFAULT_WINDOW_HEIGHT);
+inline constexpr float ASPECT_RATIO =
+    static_cast<float>(DEFAULT_WINDOW_WIDTH) / static_cast<float>(DEFAULT_WINDOW_HEIGHT);
 /// Window title
-inline constexpr const char *WINDOW_TITLE = "Scene Graph Visualization";
+inline constexpr const char* WINDOW_TITLE = "Scene Graph Visualization";
 
 /**
  * @brief Scene view settings
@@ -229,6 +229,6 @@ inline constexpr float WINDOW_TO_SCENE_OFFSET_X = 10.0F;
 /// Y offset for window to scene conversion
 inline constexpr float WINDOW_TO_SCENE_OFFSET_Y = 10.0F;
 
-} // namespace constants
+}  // namespace constants
 
-#endif // CONSTANTS_H
+#endif  // CONSTANTS_H

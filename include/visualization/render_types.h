@@ -8,10 +8,10 @@ namespace visualization {
 
 // Character glyph data for font rendering
 struct Character {
-  unsigned int textureID; // ID handle of the glyph texture
-  glm::ivec2 size;        // Size of glyph
-  glm::ivec2 bearing;     // Offset from baseline to left/top of glyph
-  unsigned int advance;   // Offset to advance to next glyph
+    unsigned int textureID;  // ID handle of the glyph texture
+    glm::ivec2 size;         // Size of glyph
+    glm::ivec2 bearing;      // Offset from baseline to left/top of glyph
+    unsigned int advance;    // Offset to advance to next glyph
 };
 
 // Rendering modes
@@ -20,6 +20,6 @@ enum class RenderMode { Normal, Headless };
 // Dummy function to ensure render_types.cpp produces symbols
 bool initializeRenderTypes();
 
-} // namespace visualization
+}  // namespace visualization
 
-#endif // VISUALIZATION_RENDER_TYPES_H
+#endif  // VISUALIZATION_RENDER_TYPES_H

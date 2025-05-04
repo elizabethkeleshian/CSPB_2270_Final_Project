@@ -24,13 +24,13 @@ using CirclePtr = std::shared_ptr<Circle>;
 
 // Utility functions
 float wrapAngle(float angle);
-} // namespace scene_graph
+}  // namespace scene_graph
 
 // Forward declarations for visualization namespace
 namespace visualization {
 class Renderer;
 class Canvas;
-} // namespace visualization
+}  // namespace visualization
 
 //-----------------------------------------------------
 // Type aliases - Mathematical types from GLM
@@ -59,4 +59,4 @@ using glm::translate;
 using std::shared_ptr;
 using std::weak_ptr;
 
-#endif // TYPES_H
+#endif  // TYPES_H

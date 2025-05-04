@@ -1,4 +1,5 @@
 #include "scene_graph/transform.h"
+
 #include "types.h"
 
 namespace scene_graph {
@@ -14,9 +15,11 @@ namespace scene_graph {
  * We use this as the starting point for all scene objects.
  */
 Transform::Transform()
-    : position_(Vector2(0.0F, 0.0F)), rotation_(radians(0.0F)),
-      scale_(Vector2(1.0F, 1.0F)), matrix_(Matrix4(1.0F)) {
-  updateMatrix();
+    : position_(Vector2(0.0F, 0.0F)),
+      rotation_(radians(0.0F)),
+      scale_(Vector2(1.0F, 1.0F)),
+      matrix_(Matrix4(1.0F)) {
+    updateMatrix();
 }
 
 /**
@@ -30,10 +33,12 @@ Transform::Transform()
  *
  * @param original The transform to copy values from
  */
-Transform::Transform(const Transform &original)
-    : position_(original.position_), rotation_(original.rotation_),
-      scale_(original.scale_), matrix_(original.matrix_) {
-  updateMatrix();
+Transform::Transform(const Transform& original)
+    : position_(original.position_),
+      rotation_(original.rotation_),
+      scale_(original.scale_),
+      matrix_(original.matrix_) {
+    updateMatrix();
 }
 
 /**
@@ -45,12 +50,12 @@ Transform::Transform(const Transform &original)
  * @param original The transform to assign values from
  * @return Reference to this transform after assignment
  */
-Transform &Transform::operator=(const Transform &original) {
-  position_ = original.position_;
-  rotation_ = original.rotation_;
-  scale_ = original.scale_;
-  updateMatrix();
-  return *this;
+Transform& Transform::operator=(const Transform& original) {
+    position_ = original.position_;
+    rotation_ = original.rotation_;
+    scale_ = original.scale_;
+    updateMatrix();
+    return *this;
 }
 
 /**
@@ -65,14 +70,14 @@ Transform &Transform::operator=(const Transform &original) {
  * @param rotation The rotation in degrees to set
  */
 void Transform::setRotation(float rotation) {
-  // Normalize rotation to [0, 360)
-  const float k360 = 360.0F;
-  rotation = fmod(rotation, k360);
-  if (rotation < 0.0F) {
-    rotation += k360;
-  }
-  rotation_ = radians(rotation);
-  updateMatrix();
+    // Normalize rotation to [0, 360)
+    const float k360 = 360.0F;
+    rotation = fmod(rotation, k360);
+    if (rotation < 0.0F) {
+        rotation += k360;
+    }
+    rotation_ = radians(rotation);
+    updateMatrix();
 }
 
 /**
@@ -84,16 +89,16 @@ void Transform::setRotation(float rotation) {
  * @return The rotation in degrees in the range [0, 360)
  */
 float Transform::getRotation() const {
-  float rotationDegrees = degrees(rotation_);
+    float rotationDegrees = degrees(rotation_);
 
-  // Normalize to [0, 360)
-  const float k360 = 360.0F;
-  rotationDegrees = fmod(rotationDegrees, k360);
-  if (rotationDegrees < 0.0F) {
-    rotationDegrees += k360;
-  }
+    // Normalize to [0, 360)
+    const float k360 = 360.0F;
+    rotationDegrees = fmod(rotationDegrees, k360);
+    if (rotationDegrees < 0.0F) {
+        rotationDegrees += k360;
+    }
 
-  return rotationDegrees;
+    return rotationDegrees;
 }
 
 /**
@@ -108,12 +113,10 @@ float Transform::getRotation() const {
  * attached to moving cars, for example.
  */
 void Transform::updateMatrix() {
-  Matrix4 scaleMatrix = scale(Matrix4(1.0F), Vector3(scale_.x, scale_.y, 1.0f));
-  Matrix4 rotationMatrix =
-      rotate(Matrix4(1.0F), rotation_, Vector3(0.0F, 0.0F, 1.0F));
-  Matrix4 translationMatrix =
-      translate(Matrix4(1.0F), Vector3(position_.x, position_.y, 0.0F));
-  matrix_ = translationMatrix * rotationMatrix * scaleMatrix;
+    Matrix4 scaleMatrix = scale(Matrix4(1.0F), Vector3(scale_.x, scale_.y, 1.0f));
+    Matrix4 rotationMatrix = rotate(Matrix4(1.0F), rotation_, Vector3(0.0F, 0.0F, 1.0F));
+    Matrix4 translationMatrix = translate(Matrix4(1.0F), Vector3(position_.x, position_.y, 0.0F));
+    matrix_ = translationMatrix * rotationMatrix * scaleMatrix;
 }
 
 /**
@@ -127,28 +130,28 @@ void Transform::updateMatrix() {
  *
  * @param matrix The 4x4 transformation matrix to set
  */
-void Transform::setMatrix(const Matrix4 &matrix) {
-  matrix_ = matrix;
+void Transform::setMatrix(const Matrix4& matrix) {
+    matrix_ = matrix;
 
-  // Extract translation directly
-  position_.x = matrix_[3][0];
-  position_.y = matrix_[3][1];
+    // Extract translation directly
+    position_.x = matrix_[3][0];
+    position_.y = matrix_[3][1];
 
-  // Extract scale - use length of the basis vectors
-  scale_.x = glm::length(glm::vec2(matrix_[0][0], matrix_[0][1]));
-  scale_.y = glm::length(glm::vec2(matrix_[1][0], matrix_[1][1]));
+    // Extract scale - use length of the basis vectors
+    scale_.x = glm::length(glm::vec2(matrix_[0][0], matrix_[0][1]));
+    scale_.y = glm::length(glm::vec2(matrix_[1][0], matrix_[1][1]));
 
-  // Extract rotation
-  const float kMinScale = 0.0001F;
-  if (scale_.x > kMinScale) {
-    // Calculate rotation from the normalized x basis vector
-    float cosTheta = matrix_[0][0] / scale_.x;
-    float sinTheta = matrix_[0][1] / scale_.x;
-    rotation_ = atan2(sinTheta, cosTheta);
-  } else {
-    // Avoid division by near-zero scale
-    rotation_ = 0.0F;
-  }
+    // Extract rotation
+    const float kMinScale = 0.0001F;
+    if (scale_.x > kMinScale) {
+        // Calculate rotation from the normalized x basis vector
+        float cosTheta = matrix_[0][0] / scale_.x;
+        float sinTheta = matrix_[0][1] / scale_.x;
+        rotation_ = atan2(sinTheta, cosTheta);
+    } else {
+        // Avoid division by near-zero scale
+        rotation_ = 0.0F;
+    }
 }
 
 /**
@@ -161,9 +164,9 @@ void Transform::setMatrix(const Matrix4 &matrix) {
  * @return A new Transform representing the inverse transformation
  */
 Transform Transform::inverse() const {
-  Transform result;
-  result.setMatrix(glm::inverse(matrix_));
-  return result;
+    Transform result;
+    result.setMatrix(glm::inverse(matrix_));
+    return result;
 }
 
 /**
@@ -176,10 +179,10 @@ Transform Transform::inverse() const {
  * @param point The point to transform in local coordinates
  * @return The transformed point in global coordinates
  */
-Vector2 Transform::transformPoint(const Vector2 &point) const {
-  Vector4 homogeneous(point, 0.0F, 1.0F);
-  Vector4 transformed = matrix_ * homogeneous;
-  return {transformed};
+Vector2 Transform::transformPoint(const Vector2& point) const {
+    Vector4 homogeneous(point, 0.0F, 1.0F);
+    Vector4 transformed = matrix_ * homogeneous;
+    return {transformed};
 }
 
 /**
@@ -192,11 +195,11 @@ Vector2 Transform::transformPoint(const Vector2 &point) const {
  * @param point The point to transform in global coordinates
  * @return The transformed point in local coordinates
  */
-Vector2 Transform::inverseTransformPoint(const Vector2 &point) const {
-  Matrix4 inverseMatrix = glm::inverse(matrix_);
-  Vector4 homogeneous(point, 0.0F, 1.0F);
-  Vector4 transformed = inverseMatrix * homogeneous;
-  return {transformed};
+Vector2 Transform::inverseTransformPoint(const Vector2& point) const {
+    Matrix4 inverseMatrix = glm::inverse(matrix_);
+    Vector4 homogeneous(point, 0.0F, 1.0F);
+    Vector4 transformed = inverseMatrix * homogeneous;
+    return {transformed};
 }
 
 /**
@@ -213,11 +216,11 @@ Vector2 Transform::inverseTransformPoint(const Vector2 &point) const {
  * @param child The child transform
  * @return A new Transform representing the combined transformation
  */
-Transform Transform::combine(const Transform &parent, const Transform &child) {
-  Transform result;
-  result.matrix_ = parent.matrix_ * child.matrix_;
-  result.setMatrix(result.matrix_);
-  return result;
+Transform Transform::combine(const Transform& parent, const Transform& child) {
+    Transform result;
+    result.matrix_ = parent.matrix_ * child.matrix_;
+    result.setMatrix(result.matrix_);
+    return result;
 }
 
 /**
@@ -233,16 +236,14 @@ Transform Transform::combine(const Transform &parent, const Transform &child) {
  * @param factor The interpolation factor in the range [0, 1]
  * @return A new Transform representing the interpolated transformation
  */
-Transform Transform::interpolate(const Transform &start, const Transform &end,
-                                 float factor) {
-  Transform result;
-  result.position_ = glm::mix(start.position_, end.position_, factor);
-  result.rotation_ = scene_graph::wrapAngle(
-      glm::mix(scene_graph::wrapAngle(start.rotation_),
-               scene_graph::wrapAngle(end.rotation_), factor));
-  result.scale_ = glm::mix(start.scale_, end.scale_, factor);
-  result.updateMatrix();
-  return result;
+Transform Transform::interpolate(const Transform& start, const Transform& end, float factor) {
+    Transform result;
+    result.position_ = glm::mix(start.position_, end.position_, factor);
+    result.rotation_ = scene_graph::wrapAngle(glm::mix(
+        scene_graph::wrapAngle(start.rotation_), scene_graph::wrapAngle(end.rotation_), factor));
+    result.scale_ = glm::mix(start.scale_, end.scale_, factor);
+    result.updateMatrix();
+    return result;
 }
 
 /**
@@ -263,11 +264,10 @@ Transform Transform::interpolate(const Transform &start, const Transform &end,
  * @param point The point to transform in the child's local coordinates
  * @return The transformed point in global coordinates
  */
-Vector2 Transform::localToGlobalCoordinates(const Transform &parent,
-                                            const Transform &child,
-                                            const Vector2 &point) {
-  Vector2 localPoint = child.transformPoint(point);
-  return parent.transformPoint(localPoint);
+Vector2 Transform::localToGlobalCoordinates(const Transform& parent, const Transform& child,
+                                            const Vector2& point) {
+    Vector2 localPoint = child.transformPoint(point);
+    return parent.transformPoint(localPoint);
 }
 
 /**
@@ -281,11 +281,10 @@ Vector2 Transform::localToGlobalCoordinates(const Transform &parent,
  * @param point The point to transform in global coordinates
  * @return The transformed point in the child's local coordinates
  */
-Vector2 Transform::globalToLocalCoordinates(const Transform &parent,
-                                            const Transform &child,
-                                            const Vector2 &point) {
-  Vector2 globalPoint = parent.inverseTransformPoint(point);
-  return child.inverseTransformPoint(globalPoint);
+Vector2 Transform::globalToLocalCoordinates(const Transform& parent, const Transform& child,
+                                            const Vector2& point) {
+    Vector2 globalPoint = parent.inverseTransformPoint(point);
+    return child.inverseTransformPoint(globalPoint);
 }
 
-} // namespace scene_graph
+}  // namespace scene_graph

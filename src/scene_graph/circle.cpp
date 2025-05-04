@@ -1,4 +1,5 @@
 #include "scene_graph/circle.h"
+
 #include "types.h"
 
 namespace scene_graph {
@@ -13,8 +14,8 @@ namespace scene_graph {
  * @param name Unique identifier for this circle in the scene
  * @param radius Distance from center to edge (defaults to 0.5 units)
  */
-Circle::Circle(const std::string &name, float radius)
-    : Shape(name), radius_(radius) {}
+Circle::Circle(const std::string& name, float radius) : Shape(name), radius_(radius) {
+}
 
 /**
  * @brief Sets the radius of the circle
@@ -25,14 +26,18 @@ Circle::Circle(const std::string &name, float radius)
  *
  * @param radius New radius value (distance from center to edge)
  */
-void Circle::setRadius(float radius) { radius_ = radius; }
+void Circle::setRadius(float radius) {
+    radius_ = radius;
+}
 
 /**
  * @brief Gets the current radius of the circle
  *
  * @return Current radius value
  */
-float Circle::getRadius() const { return radius_; }
+float Circle::getRadius() const {
+    return radius_;
+}
 
 /**
  * @brief Renders the circle
@@ -42,7 +47,7 @@ float Circle::getRadius() const { return radius_; }
  * the circle as a 32-segment polygon.
  */
 void Circle::render() const {
-  // Default implementation
+    // Default implementation
 }
 
 /**
@@ -58,9 +63,9 @@ void Circle::render() const {
  * @param point The point to test in world coordinates
  * @return true if the point is inside the circle, false otherwise
  */
-bool Circle::containsPoint(const Vector2 &point) const {
-  Vector2 localPoint = getLocalTransform().inverseTransformPoint(point);
-  float distance = length(localPoint);
-  return distance <= radius_;
+bool Circle::containsPoint(const Vector2& point) const {
+    Vector2 localPoint = getLocalTransform().inverseTransformPoint(point);
+    float distance = length(localPoint);
+    return distance <= radius_;
 }
-} // namespace scene_graph
+}  // namespace scene_graph

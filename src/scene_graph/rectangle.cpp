@@ -11,8 +11,8 @@ namespace scene_graph {
  * @param name Unique identifier for this rectangle in the scene
  * @param size Vector2 containing width and height (defaults to 1x1 unit square)
  */
-Rectangle::Rectangle(const std::string &name, const Vector2 &size)
-    : Shape(name), size_(size) {}
+Rectangle::Rectangle(const std::string& name, const Vector2& size) : Shape(name), size_(size) {
+}
 
 /**
  * @brief Sets the size of the rectangle
@@ -23,14 +23,18 @@ Rectangle::Rectangle(const std::string &name, const Vector2 &size)
  *
  * @param size Vector2 containing width (x) and height (y)
  */
-void Rectangle::setSize(const Vector2 &size) { size_ = size; }
+void Rectangle::setSize(const Vector2& size) {
+    size_ = size;
+}
 
 /**
  * @brief Gets the current size of the rectangle
  *
  * @return Vector2 containing width (x) and height (y)
  */
-const Vector2 &Rectangle::getSize() const { return size_; }
+const Vector2& Rectangle::getSize() const {
+    return size_;
+}
 
 /**
  * @brief Renders the rectangle
@@ -40,7 +44,7 @@ const Vector2 &Rectangle::getSize() const { return size_; }
  * This separation keeps rendering details out of our scene graph.
  */
 void Rectangle::render() const {
-  // Default implementation
+    // Default implementation
 }
 
 /**
@@ -53,10 +57,10 @@ void Rectangle::render() const {
  * @param point The point to test in world coordinates
  * @return true if the point is inside the rectangle, false otherwise
  */
-bool Rectangle::containsPoint(const Vector2 &point) const {
-  Vector2 localPoint = getLocalTransform().inverseTransformPoint(point);
-  float halfWidth = size_.x / 2.0F;
-  float halfHeight = size_.y / 2.0F;
-  return abs(localPoint.x) <= halfWidth && abs(localPoint.y) <= halfHeight;
+bool Rectangle::containsPoint(const Vector2& point) const {
+    Vector2 localPoint = getLocalTransform().inverseTransformPoint(point);
+    float halfWidth = size_.x / 2.0F;
+    float halfHeight = size_.y / 2.0F;
+    return abs(localPoint.x) <= halfWidth && abs(localPoint.y) <= halfHeight;
 }
-} // namespace scene_graph
+}  // namespace scene_graph
