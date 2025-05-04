@@ -35,6 +35,11 @@ public:
   void selectAt(const Vector2 &position);
   [[nodiscard]] std::shared_ptr<scene_graph::Node> getSelectedNode() const;
 
+  // Set the selected node directly
+  void setSelectedNode(const std::shared_ptr<scene_graph::Node> &node) {
+    selectedNode_ = node;
+  }
+
 private:
   // helper to render node and its children
   void renderNode(const std::shared_ptr<scene_graph::Node> &node, int depth,
@@ -55,14 +60,10 @@ private:
     int y;
     int width;
     int height;
+    float visualY; // Actual visual Y position
   };
 
   std::vector<NodePosition> nodePositions_;
-  // UI constants
-  static constexpr int INDENT_SIZE =
-      constants::TREE_VIEW_INDENT_SIZE; // Pixels per depth level
-  static constexpr int NODE_HEIGHT =
-      constants::TREE_VIEW_NODE_HEIGHT; // Height of a node in pixels
 };
 
 } // namespace visualization

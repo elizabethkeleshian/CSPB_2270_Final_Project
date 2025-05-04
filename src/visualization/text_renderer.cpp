@@ -1,4 +1,5 @@
 #include "visualization/text_renderer.h"
+#include "constants.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -132,8 +133,13 @@ void TextRenderer::drawText(const std::string &text, float x, float y,
   // Activate shader
   shaderManager_->useShader(impl_->shaderName);
 
-  // Set projection matrix (simple orthographic)
-  Matrix4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 1.0f);
+  // Set projection matrix (ortho using SCENE constants from constants.h)
+  // to match the same coordinate system used elsewhere
+  float halfWidth = constants::SCENE_HALF_WIDTH;
+  float halfHeight = constants::SCENE_HALF_HEIGHT;
+  Matrix4 projection =
+      glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -1.0f, 1.0f);
+
   shaderManager_->setUniformMatrix4fv(impl_->shaderName, "projection",
                                       projection);
 
@@ -144,7 +150,7 @@ void TextRenderer::drawText(const std::string &text, float x, float y,
   glBindVertexArray(impl_->textVAO);
 
   // Scale for text size
-  float scale = 0.01f;
+  float uniformScale = constants::TEXT_SCALE;
 
   // Iterate through characters
   float xpos = x;
@@ -154,12 +160,12 @@ void TextRenderer::drawText(const std::string &text, float x, float y,
       continue;
     }
 
-    float w = ch->size.x * scale;
-    float h = ch->size.y * scale;
+    float w = ch->size.x * uniformScale;
+    float h = ch->size.y * uniformScale;
 
     // Calculate position for each character
-    float xpos_offset = xpos + ch->bearing.x * scale;
-    float ypos_offset = y - (ch->size.y - ch->bearing.y) * scale;
+    float xpos_offset = xpos + ch->bearing.x * uniformScale;
+    float ypos_offset = y - (ch->size.y - ch->bearing.y) * uniformScale;
 
     // Update VBO for each character
     float vertices[6][4] = {{xpos_offset, ypos_offset + h, 0.0f, 0.0f},
@@ -182,7 +188,7 @@ void TextRenderer::drawText(const std::string &text, float x, float y,
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // Advance for next glyph
-    xpos += (ch->advance >> 6) * scale;
+    xpos += (ch->advance >> 6) * uniformScale;
   }
 
   // Unbind

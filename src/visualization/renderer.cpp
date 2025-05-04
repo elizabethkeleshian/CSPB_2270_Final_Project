@@ -117,7 +117,10 @@ void Renderer::beginFrame() {
     return;
   }
 
-  glClearColor(0.2F, 0.3F, 0.3F, 1.0F);
+  glClearColor(constants::colors::RENDERER_CLEAR[0],
+               constants::colors::RENDERER_CLEAR[1],
+               constants::colors::RENDERER_CLEAR[2],
+               constants::colors::RENDERER_CLEAR[3]);
   glClear(GL_COLOR_BUFFER_BIT);
 }
 

@@ -1,4 +1,5 @@
 // test/visualization/renderer_test.cpp (expanded)
+#include "constants.h"
 #include "scene_graph/circle.h"
 #include "scene_graph/rectangle.h"
 #include "types.h"
@@ -25,7 +26,8 @@ TEST_F(RendererTest, Initialize_Success) {
 
 TEST_F(RendererTest, SetViewport_UpdatesDimensions) {
   renderer->initialize();
-  renderer->setViewport(800, 600);
+  renderer->setViewport(constants::DEFAULT_WINDOW_WIDTH,
+                        constants::DEFAULT_WINDOW_HEIGHT);
   // Hard to test the actual dimensions since they're internal
   // So we'll just verify the method doesn't crash
   SUCCEED();

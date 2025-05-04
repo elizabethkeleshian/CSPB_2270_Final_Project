@@ -266,8 +266,18 @@ void Application::handleMouseButton(int button, int action, int mods) {
           draggedNode_ = hitNode;
           lastMousePos_ = mousePos;
           canvas_->selectNode(hitNode);
+
+          // Sync tree view with canvas selection
+          if (treeView_) {
+            treeView_->setSelectedNode(hitNode);
+          }
         } else {
           canvas_->selectNode(nullptr);
+
+          // Sync tree view with canvas selection (clear selection)
+          if (treeView_) {
+            treeView_->setSelectedNode(nullptr);
+          }
         }
       }
     } else if (action == GLFW_RELEASE) {
@@ -279,40 +289,30 @@ void Application::handleMouseButton(int button, int action, int mods) {
 }
 
 Vector2 Application::windowToSceneCoordinates(double xpos, double ypos) const {
-  // Convert directly from pixel coordinates to scene coordinates
+  // Use consistent scaling for both dimensions
+  float aspectRatio =
+      static_cast<float>(window_->getWidth()) / window_->getHeight();
   float sceneX = ((float)xpos / window_->getWidth() * constants::SCENE_WIDTH) -
                  constants::SCENE_HALF_WIDTH;
-  float sceneY = constants::SCENE_HALF_HEIGHT -
-                 ((float)ypos / window_->getHeight() * constants::SCENE_HEIGHT);
+  float sceneY =
+      constants::SCENE_HALF_HEIGHT - ((float)ypos / window_->getHeight() *
+                                      (constants::SCENE_WIDTH / aspectRatio));
+
   return Vector2(sceneX, sceneY);
-  // // Normalize window coordinates to [-1, 1] range
-  // float normalizedX =
-  //     (2.0f * static_cast<float>(xpos) / window_->getWidth()) - 1.0f;
-  // float normalizedY =
-  //     1.0f - (2.0f * static_cast<float>(ypos) / window_->getHeight());
-
-  // // Convert to scene coordinates with proper aspect ratio
-  // float aspectRatio =
-  //     static_cast<float>(window_->getWidth()) / window_->getHeight();
-  // float sceneWidth = constants::SCENE_WIDTH;
-  // float sceneHeight = sceneWidth / aspectRatio;
-
-  // return Vector2(normalizedX * (sceneWidth / 2.0f),
-  //                normalizedY * (sceneHeight / 2.0f));
 }
 
 void Application::setupSceneGraph() {
   // Create a red car
   auto redCar = createCar(
       "RedCar", Vector2(constants::RED_CAR_START_X, constants::RED_CAR_START_Y),
-      Vector4(0.8f, 0.2f, 0.2f, 1.0f) // Red
-  );
+      Vector4(constants::colors::RED_CAR[0], constants::colors::RED_CAR[1],
+              constants::colors::RED_CAR[2], constants::colors::RED_CAR[3]));
 
   auto blueCar = createCar(
       "BlueCar",
       Vector2(constants::BLUE_CAR_START_X, constants::BLUE_CAR_START_Y),
-      Vector4(0.2f, 0.4f, 0.8f, 1.0f) // Blue
-  );
+      Vector4(constants::colors::BLUE_CAR[0], constants::colors::BLUE_CAR[1],
+              constants::colors::BLUE_CAR[2], constants::colors::BLUE_CAR[3]));
 
   // Set up hierarchy - the cars are now direct children of the root
   root_->addChild(redCar);
@@ -506,38 +506,46 @@ Application::createCar(const std::string &name, const Vector2 &position,
       bodyColor);
 
   // Create car roof (child of body)
-  auto carRoof =
-      createRectangle(name + "_Roof",
-                      Vector2(constants::CAR_BODY_WIDTH * 0.5f,
-                              constants::CAR_BODY_HEIGHT * 0.8f),
-                      Vector2(0.0f, constants::CAR_BODY_HEIGHT *
-                                        0.7f), // Position relative to body
-                      bodyColor);
+  auto carRoof = createRectangle(
+      name + "_Roof",
+      Vector2(constants::CAR_BODY_WIDTH * constants::CAR_ROOF_WIDTH_FACTOR,
+              constants::CAR_BODY_HEIGHT * constants::CAR_ROOF_HEIGHT_FACTOR),
+      Vector2(
+          0.0f,
+          constants::CAR_BODY_HEIGHT *
+              constants::CAR_ROOF_POSITION_FACTOR), // Position relative to body
+      bodyColor);
   // Create car wheels (children of body)
   auto frontWheel = createCircle(
       name + "_FrontWheel", constants::CAR_WHEEL_RADIUS,
       Vector2(constants::CAR_WHEEL_OFFSET_X, constants::CAR_WHEEL_OFFSET_Y),
-      Vector4(0.2f, 0.2f, 0.2f, 1.0f) // Dark gray/black
-  );
+      Vector4(constants::colors::CAR_WHEEL[0], constants::colors::CAR_WHEEL[1],
+              constants::colors::CAR_WHEEL[2],
+              constants::colors::CAR_WHEEL[3]));
 
   auto rearWheel = createCircle(
       name + "_RearWheel", constants::CAR_WHEEL_RADIUS,
       Vector2(-constants::CAR_WHEEL_OFFSET_X, constants::CAR_WHEEL_OFFSET_Y),
-      Vector4(0.2f, 0.2f, 0.2f, 1.0f) // Dark gray/black
-  );
+      Vector4(constants::colors::CAR_WHEEL[0], constants::colors::CAR_WHEEL[1],
+              constants::colors::CAR_WHEEL[2],
+              constants::colors::CAR_WHEEL[3]));
 
   // Add details to wheels (hubcaps)
-  auto frontHubcap =
-      createCircle(name + "_FrontHubcap", constants::CAR_WHEEL_RADIUS * 0.4f,
-                   Vector2(0.0f, 0.0f),            // Center of wheel
-                   Vector4(0.8f, 0.8f, 0.8f, 1.0f) // Silver
-      );
+  auto frontHubcap = createCircle(
+      name + "_FrontHubcap",
+      constants::CAR_WHEEL_RADIUS * constants::CAR_HUBCAP_RADIUS_FACTOR,
+      Vector2(0.0f, 0.0f), // Center of wheel
+      Vector4(
+          constants::colors::CAR_HUBCAP[0], constants::colors::CAR_HUBCAP[1],
+          constants::colors::CAR_HUBCAP[2], constants::colors::CAR_HUBCAP[3]));
 
-  auto rearHubcap =
-      createCircle(name + "_RearHubcap", constants::CAR_WHEEL_RADIUS * 0.4f,
-                   Vector2(0.0f, 0.0f),            // Center of wheel
-                   Vector4(0.8f, 0.8f, 0.8f, 1.0f) // Silver
-      );
+  auto rearHubcap = createCircle(
+      name + "_RearHubcap",
+      constants::CAR_WHEEL_RADIUS * constants::CAR_HUBCAP_RADIUS_FACTOR,
+      Vector2(0.0f, 0.0f), // Center of wheel
+      Vector4(
+          constants::colors::CAR_HUBCAP[0], constants::colors::CAR_HUBCAP[1],
+          constants::colors::CAR_HUBCAP[2], constants::colors::CAR_HUBCAP[3]));
 
   // Setup hierarchy
   car->addChild(carBody); // Attach body to car

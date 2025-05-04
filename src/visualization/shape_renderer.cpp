@@ -1,17 +1,17 @@
 #include "visualization/shape_renderer.h"
+#include "constants.h"
 #include <GL/glew.h>
 #include <cmath>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-
 namespace visualization {
 
 struct ShapeRenderer::Impl {
   bool initialized = false;
   unsigned int rectangleVAO = 0;
   unsigned int circleVAO = 0;
-  int viewportWidth = 800;
-  int viewportHeight = 600;
+  int viewportWidth = constants::DEFAULT_WINDOW_WIDTH;
+  int viewportHeight = constants::DEFAULT_WINDOW_HEIGHT;
   std::string shaderName = "shape";
 };
 

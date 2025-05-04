@@ -61,8 +61,8 @@ private:
   std::shared_ptr<ShapeRenderer> shapeRenderer_;
 
   // Viewport dimensions
-  int viewportWidth_ = constants::DEFAULT_VIEWPORT_WIDTH;
-  int viewportHeight_ = constants::DEFAULT_VIEWPORT_HEIGHT;
+  int viewportWidth_ = constants::DEFAULT_WINDOW_WIDTH;
+  int viewportHeight_ = constants::DEFAULT_WINDOW_HEIGHT;
 };
 
 } // namespace visualization

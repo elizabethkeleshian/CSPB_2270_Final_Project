@@ -39,30 +39,8 @@ void Canvas::clear() {
 }
 
 void Canvas::selectNode(const std::shared_ptr<scene_graph::Node> &node) {
-  // If we already have a selected node, reset its color
-  if (selectedNode_) {
-    if (auto shape =
-            std::dynamic_pointer_cast<scene_graph::Shape>(selectedNode_)) {
-      Vector4 originalColor;
-      // Get the original color (before selection)
-      // This is a simplified approach - you might want to store original colors
-      originalColor = shape->getColor();
-      // Remove highlight
-      shape->setColor(originalColor);
-    }
-  }
-
-  // Set the new selected node
+  // Set the new selected node without changing colors
   selectedNode_ = node;
-
-  // If the new node is not null, highlight it
-  if (node) {
-    if (auto shape = std::dynamic_pointer_cast<scene_graph::Shape>(node)) {
-      Vector4 originalColor = shape->getColor();
-      Vector4 highlightColor(1.0f, 1.0f, 0.0f, originalColor.a);
-      shape->setColor(highlightColor);
-    }
-  }
   std::cout << "Selected node: " << (node ? node->getName() : "none")
             << std::endl;
 }
@@ -103,7 +81,10 @@ void Canvas::renderNode(const std::shared_ptr<scene_graph::Node> &node) {
     if (isSelected) {
       originalColor = shape->getColor();
       // Adjust color to indicate selection (e.g., add a yellow tint)
-      Vector4 highlightColor(1.0f, 1.0f, 0.0f, originalColor.a);
+      Vector4 highlightColor(constants::colors::NODE_SELECTED[0],
+                             constants::colors::NODE_SELECTED[1],
+                             constants::colors::NODE_SELECTED[2],
+                             originalColor.a);
       shape->setColor(highlightColor);
     }
 

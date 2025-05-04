@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "visualization/window.h"
 #include <gtest/gtest.h>
 
@@ -13,7 +14,8 @@ protected:
 };
 
 TEST_F(WindowTest, Create_Success) {
-  EXPECT_TRUE(window->create(800, 600, "Test Window"));
+  EXPECT_TRUE(window->create(constants::DEFAULT_WINDOW_WIDTH,
+                             constants::DEFAULT_WINDOW_HEIGHT, "Test Window"));
 }
 
 TEST_F(WindowTest, Create_InvalidDimensions) {
@@ -21,9 +23,10 @@ TEST_F(WindowTest, Create_InvalidDimensions) {
 }
 
 TEST_F(WindowTest, GetDimensions) {
-  window->create(800, 600, "Test Window");
-  EXPECT_EQ(window->getWidth(), 800);
-  EXPECT_EQ(window->getHeight(), 600);
+  window->create(constants::DEFAULT_WINDOW_WIDTH,
+                 constants::DEFAULT_WINDOW_HEIGHT, "Test Window");
+  EXPECT_EQ(window->getWidth(), constants::DEFAULT_WINDOW_WIDTH);
+  EXPECT_EQ(window->getHeight(), constants::DEFAULT_WINDOW_HEIGHT);
 }
 
 TEST_F(WindowTest, MouseCallback) {
@@ -41,32 +44,37 @@ TEST_F(WindowTest, KeyCallback) {
 }
 
 TEST_F(WindowTest, ShouldClose_InitiallyFalse) {
-  window->create(800, 600, "Test Window");
+  window->create(constants::DEFAULT_WINDOW_WIDTH,
+                 constants::DEFAULT_WINDOW_HEIGHT, "Test Window");
   EXPECT_FALSE(window->shouldClose());
 }
 
 // Test window destruction
 TEST_F(WindowTest, Destruction_ClosesWindow) {
   auto window = std::make_unique<Window>();
-  window->create(800, 600, "Test Window");
+  window->create(constants::DEFAULT_WINDOW_WIDTH,
+                 constants::DEFAULT_WINDOW_HEIGHT, "Test Window");
   // Window should be closed when destroyed
 }
 
 // Test poll events
 TEST_F(WindowTest, PollEvents_NoExceptions) {
-  window->create(800, 600, "Test Window");
+  window->create(constants::DEFAULT_WINDOW_WIDTH,
+                 constants::DEFAULT_WINDOW_HEIGHT, "Test Window");
   EXPECT_NO_THROW(window->pollEvents());
 }
 
 // Test swap buffers
 TEST_F(WindowTest, SwapBuffers_NoExceptions) {
-  window->create(800, 600, "Test Window");
+  window->create(constants::DEFAULT_WINDOW_WIDTH,
+                 constants::DEFAULT_WINDOW_HEIGHT, "Test Window");
   EXPECT_NO_THROW(window->swapBuffers());
 }
 
 // Test setting should close
 TEST_F(WindowTest, ShouldClose_SettingFlag) {
-  window->create(800, 600, "Test Window");
+  window->create(constants::DEFAULT_WINDOW_WIDTH,
+                 constants::DEFAULT_WINDOW_HEIGHT, "Test Window");
   // Need a way to set the shouldClose flag, perhaps add a method to Window
   // window->setShouldClose(true);
   // EXPECT_TRUE(window->shouldClose());
