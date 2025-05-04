@@ -39,6 +39,9 @@ private:
   void handleMouseButton(int button, int action, int mods);
   [[nodiscard]] Vector2 windowToSceneCoordinates(double xpos,
                                                  double ypos) const;
+  void printSceneHierarchy(const std::shared_ptr<scene_graph::Node> &node,
+                           int depth);
+  void printOpenGLInfo();
 
   // Scene graph setup
   void setupSceneGraph();

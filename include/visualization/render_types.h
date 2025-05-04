@@ -17,6 +17,9 @@ struct Character {
 // Rendering modes
 enum class RenderMode { Normal, Headless };
 
+// Dummy function to ensure render_types.cpp produces symbols
+bool initializeRenderTypes();
+
 } // namespace visualization
 
 #endif // VISUALIZATION_RENDER_TYPES_H

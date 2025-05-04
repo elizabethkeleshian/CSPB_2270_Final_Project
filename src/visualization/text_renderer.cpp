@@ -1,5 +1,6 @@
 #include "visualization/text_renderer.h"
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
@@ -20,9 +21,38 @@ TextRenderer::TextRenderer(std::shared_ptr<FontManager> fontManager,
 TextRenderer::~TextRenderer() { cleanup(); }
 
 bool TextRenderer::initialize(RenderMode mode) {
+  std::cout << "TextRenderer initialization starting..." << std::endl;
+
+  // Make sure dependencies are valid
+  if (!fontManager_) {
+    std::cerr << "Error: FontManager is null in TextRenderer::initialize"
+              << std::endl;
+    return false;
+  }
+
+  if (!shaderManager_) {
+    std::cerr << "Error: ShaderManager is null in TextRenderer::initialize"
+              << std::endl;
+    return false;
+  }
+
+  if (!impl_) {
+    std::cerr
+        << "Error: Implementation (impl_) is null in TextRenderer::initialize"
+        << std::endl;
+    return false;
+  }
   if (mode == RenderMode::Headless) {
     impl_->initialized = true;
     return true;
+  }
+
+  std::cout << "TextRenderer dependencies validated successfully" << std::endl;
+
+  if (glfwGetCurrentContext() == nullptr) {
+    std::cerr << "Error: No current OpenGL context in TextRenderer::initialize"
+              << std::endl;
+    return false;
   }
 
   // Create shader program for text rendering
@@ -59,6 +89,7 @@ bool TextRenderer::initialize(RenderMode mode) {
     std::cerr << "Failed to create text shader program" << std::endl;
     return false;
   }
+  std::cout << "TextRenderer shader program created successfully" << std::endl;
 
   // Configure VAO/VBO for text rendering
   glGenVertexArrays(1, &impl_->textVAO);
@@ -72,6 +103,7 @@ bool TextRenderer::initialize(RenderMode mode) {
   glBindVertexArray(0);
 
   impl_->initialized = true;
+  std::cout << "TextRenderer initialized successfully" << std::endl;
   return true;
 }
 

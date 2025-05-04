@@ -56,26 +56,45 @@ bool ShaderManager::createShaderProgram(const std::string &name,
     return true;
   }
 
+  std::cout << "Creating shader program: " << name << std::endl;
+
   // Compile vertex shader
   unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+  std::cout << "Vertex shader created successfully" << std::endl;
+  if (vertexShader == 0) {
+    // Handle the error - glCreateShader returns 0 on failure
+    std::cerr << "Failed to create vertex shader" << std::endl;
+    return false;
+  }
+
+  std::cout << "Vertex shader created successfully" << std::endl;
   if (!compileShader(vertexShader, vertexSource, "vertex")) {
+    std::cerr << "Vertex shader compilation failed" << std::endl;
     glDeleteShader(vertexShader);
     return false;
   }
 
+  std::cout << "Vertex shader compiled successfully" << std::endl;
+
   // Compile fragment shader
   unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
   if (!compileShader(fragmentShader, fragmentSource, "fragment")) {
+    std::cerr << "Fragment shader compilation failed" << std::endl;
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     return false;
   }
+
+  std::cout << "Fragment shader compiled successfully" << std::endl;
 
   // Create and link shader program
   unsigned int shaderProgram = glCreateProgram();
   glAttachShader(shaderProgram, vertexShader);
   glAttachShader(shaderProgram, fragmentShader);
   glLinkProgram(shaderProgram);
+
+  std::cout << "Shader program linked successfully" << std::endl;
 
   // Check linking status
   int success;
@@ -107,10 +126,12 @@ bool ShaderManager::createShaderProgram(const std::string &name,
 bool ShaderManager::compileShader(unsigned int &shader,
                                   const std::string &source,
                                   const std::string &type) {
+  std::cout << "Compiling shader: " << type << std::endl;
   const char *shaderSource = source.c_str();
   glShaderSource(shader, 1, &shaderSource, nullptr);
   glCompileShader(shader);
 
+  std::cout << "Shader compiled successfully" << std::endl;
   // Check compilation status
   int success;
   char infoLog[512];

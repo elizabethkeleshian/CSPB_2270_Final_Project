@@ -553,4 +553,22 @@ TEST_F(TransformTest, TransformChaining) {
                               similarTransform.getPosition(), 1e-5f));
 }
 
+TEST_F(TransformTest, NumericalStabilityEdgeCases) {
+  // Test with very small scale values
+  Transform tinyScaleTransform;
+  tinyScaleTransform.setScale(Vector2(1e-10f, 1e-10f));
+
+  // Now try to create an inverse transform
+  Transform inverseTiny = tinyScaleTransform.inverse();
+
+  // Test properties of the inverse
+  Vector2 testPoint(1.0f, 1.0f);
+  Vector2 transformed = tinyScaleTransform.transformPoint(testPoint);
+  Vector2 backToOriginal = inverseTiny.transformPoint(transformed);
+
+  // With very small scales, we expect larger error bounds
+  EXPECT_NEAR(backToOriginal.x, testPoint.x, 1e-3f);
+  EXPECT_NEAR(backToOriginal.y, testPoint.y, 1e-3f);
+}
+
 } // namespace scene_graph::test

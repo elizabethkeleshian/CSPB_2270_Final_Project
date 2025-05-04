@@ -138,4 +138,22 @@ TEST_F(NodeTest, TransformPropagation_ChildInheritsParentTransform) {
   EXPECT_NEAR(worldPos.y, 0.0f, 0.0001f); // 0 + 0 after rotation
 }
 
+TEST_F(NodeTest, Memory_ParentChildCleanup) {
+  // Create parent with child
+  auto parent = std::make_shared<scene_graph::Node>("Parent");
+  auto child = std::make_shared<scene_graph::Node>("Child");
+  parent->addChild(child);
+
+  // Make sure the child knows about its parent
+  EXPECT_FALSE(child->isOrphaned());
+
+  // Verify parent's children list contains the child
+  EXPECT_EQ(parent->getChildren().size(), 1);
+
+  // Explicitly remove the child
+  parent->removeChild(child);
+
+  // Verify parent's children list is updated
+  EXPECT_EQ(parent->getChildren().size(), 0);
+}
 } // namespace scene_graph

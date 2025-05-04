@@ -18,19 +18,54 @@ Renderer::Renderer()
 Renderer::~Renderer() { cleanup(); }
 
 bool Renderer::initialize() {
-  // Initialize components in correct order
+  std::cout << "Renderer initialization starting..." << std::endl;
+
+  // Check if member variables are properly initialized
+  if (!shaderManager_) {
+    std::cerr << "FATAL: ShaderManager is null!" << std::endl;
+    return false;
+  }
+
+  if (!fontManager_) {
+    std::cerr << "FATAL: FontManager is null!" << std::endl;
+    return false;
+  }
+
+  if (!textRenderer_) {
+    std::cerr << "FATAL: TextRenderer is null!" << std::endl;
+    return false;
+  }
+
+  if (!shapeRenderer_) {
+    std::cerr << "FATAL: ShapeRenderer is null!" << std::endl;
+    return false;
+  }
+
   if (!shaderManager_->initialize(mode_)) {
     std::cerr << "Failed to initialize ShaderManager" << std::endl;
     return false;
   }
+  std::cout << "ShaderManager initialized successfully" << std::endl;
 
   if (!fontManager_->initialize(mode_)) {
     std::cerr << "Failed to initialize FontManager" << std::endl;
     return false;
   }
+  std::cout << "FontManager initialized successfully" << std::endl;
 
-  if (!textRenderer_->initialize(mode_)) {
-    std::cerr << "Failed to initialize TextRenderer" << std::endl;
+  try {
+    if (!textRenderer_->initialize(mode_)) {
+      std::cerr << "Failed to initialize TextRenderer" << std::endl;
+      return false;
+    }
+    std::cout << "TextRenderer initialized successfully" << std::endl;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception during TextRenderer initialization: " << e.what()
+              << std::endl;
+    return false;
+  } catch (...) {
+    std::cerr << "Unknown exception during TextRenderer initialization"
+              << std::endl;
     return false;
   }
 
@@ -38,6 +73,7 @@ bool Renderer::initialize() {
     std::cerr << "Failed to initialize ShapeRenderer" << std::endl;
     return false;
   }
+  std::cout << "ShapeRenderer initialized successfully" << std::endl;
 
   // Set initial viewport
   shapeRenderer_->setViewport(viewportWidth_, viewportHeight_);

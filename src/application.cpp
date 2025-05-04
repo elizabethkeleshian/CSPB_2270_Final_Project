@@ -6,6 +6,7 @@
 #include "visualization/renderer.h"
 #include "visualization/tree_view.h"
 #include "visualization/window.h"
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
@@ -13,14 +14,21 @@ Application::Application()
     : window_(std::make_unique<visualization::Window>()),
       renderer_(std::make_shared<visualization::Renderer>()),
       canvas_(std::make_shared<visualization::Canvas>()),
-      treeView_(std::make_shared<visualization::TreeView>()),
       root_(std::make_shared<scene_graph::Node>("Root")), isDragging_(false),
+      treeView_(std::make_shared<visualization::TreeView>()),
       draggedNode_(nullptr), showTreeView_(true) {}
 
 bool Application::initialize() {
   try {
     if (!window_->create(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)) {
       std::cerr << "Failed to create window\n";
+      return false;
+    }
+
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+      std::cerr << "GLEW initialization failed: " << glewGetErrorString(err)
+                << std::endl;
       return false;
     }
     // Initialize renderer
@@ -55,6 +63,7 @@ bool Application::initialize() {
 
     treeView_->setRoot(root_);
     treeView_->setTextRenderer(renderer_);
+    treeView_->setRenderer(renderer_);
 
     // Setup scene graph
     try {
@@ -386,16 +395,24 @@ void Application::updateAnimations(float deltaTime) {
 
 void Application::run() {
   try {
+
+    std::cout << "Application starting" << std::endl;
+
     // Timing variables
     float lastFrameTime = 0.0f;
+
+    std::cout << "Scene hierarchy:" << std::endl;
+    printSceneHierarchy(root_, 0);
 
     // Main loop
     while (!window_->shouldClose()) {
       try {
         // Update time and calculate delta time
-        float currentTime = static_cast<float>(glfwGetTime());
+        auto currentTime = static_cast<float>(glfwGetTime());
         float deltaTime = currentTime - lastFrameTime;
         lastFrameTime = currentTime;
+
+        std::cout << "Delta time: " << deltaTime << std::endl;
 
         try {
           // Update animations
@@ -417,6 +434,12 @@ void Application::run() {
         } catch (...) {
           std::cerr << "Unknown exception in canvas rendering\n";
           break;
+        }
+
+        // Check if tree view is properly initialized
+        if (!treeView_ || !treeView_->getRoot()) {
+          std::cerr << "TreeView not properly initialized" << std::endl;
+          // Handle error
         }
 
         // Render tree view if enabled
@@ -449,6 +472,14 @@ void Application::run() {
   } catch (...) {
     std::cerr << "Unknown exception in run method\n";
   }
+}
+
+void Application::printOpenGLInfo() {
+  std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+  std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
+            << std::endl;
+  std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+  std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 }
 
 std::shared_ptr<scene_graph::Node>
@@ -509,4 +540,24 @@ Application::createCar(const std::string &name, const Vector2 &position,
   rearWheel->addChild(rearHubcap);
 
   return car;
+}
+
+void Application::printSceneHierarchy(
+    const std::shared_ptr<scene_graph::Node> &node, int depth) {
+  if (!node)
+    return;
+
+  // Print indentation
+  for (int i = 0; i < depth; i++) {
+    std::cout << "  ";
+  }
+
+  // Print node info
+  std::cout << node->getName() << " (pos: " << node->getPosition().x << ", "
+            << node->getPosition().y << ")" << std::endl;
+
+  // Print children
+  for (const auto &child : node->getChildren()) {
+    printSceneHierarchy(child, depth + 1);
+  }
 }

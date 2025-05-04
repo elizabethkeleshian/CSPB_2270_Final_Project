@@ -1,11 +1,12 @@
 #include "visualization/tree_view.h"
 #include "visualization/renderer.h"
-#include <algorithm>
+#include <iostream>
 
 namespace visualization {
 
 TreeView::TreeView()
-    : root_(nullptr), textRenderer_(nullptr), selectedNode_(nullptr) {}
+    : root_(nullptr), textRenderer_(nullptr), selectedNode_(nullptr),
+      renderer_(nullptr) {}
 
 TreeView::~TreeView() = default;
 
@@ -33,6 +34,11 @@ void TreeView::render() {
 void TreeView::renderNode(const std::shared_ptr<scene_graph::Node> &node,
                           int depth, int &yPosition) {
   if (!node) {
+    return;
+  }
+
+  if (!renderer_) {
+    std::cout << "Renderer is null" << std::endl;
     return;
   }
 

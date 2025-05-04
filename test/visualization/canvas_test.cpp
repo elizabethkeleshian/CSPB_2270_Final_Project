@@ -265,4 +265,25 @@ TEST_F(CanvasTest, GetLocalTransform_ReturnsCorrectTransform) {
   EXPECT_FLOAT_EQ(transformPos.x, testPos.x);
   EXPECT_FLOAT_EQ(transformPos.y, testPos.y);
 }
+
+TEST_F(CanvasTest, HitTest_MultipleObjects_ReturnsCorrectZOrder) {
+  // Create overlapping shapes
+  auto rect1 =
+      std::make_shared<scene_graph::Rectangle>("Rect1", Vector2(3.0f, 3.0f));
+  rect1->setPosition(Vector2(0.0f, 0.0f));
+
+  auto rect2 =
+      std::make_shared<scene_graph::Rectangle>("Rect2", Vector2(2.0f, 2.0f));
+  rect2->setPosition(Vector2(1.0f, 1.0f)); // Overlaps with rect1
+
+  // Add shapes to canvas in specific order (rect2 added last so it's on top)
+  canvas->addShape(rect1);
+  canvas->addShape(rect2);
+
+  // Hit test at a position where both rectangles overlap
+  auto hit = canvas->hitTest(Vector2(1.5f, 1.5f));
+
+  // Should return the top-most shape (rect2)
+  EXPECT_EQ(hit, rect2);
+}
 } // namespace visualization

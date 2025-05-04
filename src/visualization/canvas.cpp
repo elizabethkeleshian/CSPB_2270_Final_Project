@@ -3,7 +3,7 @@
 #include "scene_graph/shape.h"
 #include "types.h"
 #include "visualization/renderer.h"
-
+#include <iostream>
 namespace visualization {
 
 Canvas::Canvas() : renderer_(nullptr), root_(nullptr), selectedNode_(nullptr) {}
@@ -70,7 +70,9 @@ std::shared_ptr<scene_graph::Node> Canvas::getSelectedNode() const {
 }
 
 void Canvas::render() {
+
   if (!renderer_) {
+    std::cerr << "Renderer is null in Canvas::render()" << std::endl;
     return;
   }
   renderer_->beginFrame();

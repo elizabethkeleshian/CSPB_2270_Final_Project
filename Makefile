@@ -20,3 +20,6 @@ docs:
 # Clean build files
 clean:
 	rm -rf build 
+
+run: build
+	cd build && ./scene_graphs_app

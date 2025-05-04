@@ -11,7 +11,7 @@ namespace scene_graph {
 class Node : public std::enable_shared_from_this<Node> {
 public:
   Node(std::string name);
-  virtual ~Node() = default;
+  virtual ~Node();
 
   const std::string &getName() const { return name_; }
   void setName(const std::string &name) { name_ = name; }

@@ -28,6 +28,10 @@ public:
     textRenderer_ = std::move(renderer);
   }
 
+  void setRenderer(std::shared_ptr<Renderer> renderer) {
+    renderer_ = std::move(renderer);
+  }
+
   void selectAt(const Vector2 &position);
   [[nodiscard]] std::shared_ptr<scene_graph::Node> getSelectedNode() const;
 

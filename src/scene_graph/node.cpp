@@ -10,6 +10,16 @@ namespace scene_graph {
  */
 Node::Node(std::string name) : name_(std::move(name)) {}
 
+Node::~Node() {
+  std::shared_ptr<Node> parentPtr = parent_.lock();
+
+  if (parentPtr) {
+    parentPtr->removeChild(shared_from_this());
+  }
+
+  children_.clear();
+}
+
 /**
  * @brief Add a child node.
  *
