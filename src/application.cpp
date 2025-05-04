@@ -124,18 +124,59 @@ void Application::setupInputCallbacks() {
       toggleTreeView();
     }
   });
+
+  // Add mouse wheel callback for scrolling
+  window_->setScrollCallback([this](double xoffset, double yoffset) {
+    if (showTreeView_ && treeView_) {
+      // Check if mouse is in tree view area
+      double xpos, ypos;
+      glfwGetCursorPos(static_cast<GLFWwindow *>(window_->getWindowHandle()),
+                       &xpos, &ypos);
+      Vector2 mousePos = windowToSceneCoordinates(xpos, ypos);
+
+      bool mouseInTreeView = mousePos.x < -constants::SCENE_HALF_WIDTH +
+                                              constants::TREE_VIEW_WIDTH;
+
+      if (mouseInTreeView) {
+        // Scroll amount - scale to feel natural
+        float scrollAmount = static_cast<float>(yoffset) * 0.5f;
+        treeView_->scroll(scrollAmount);
+      }
+    }
+  });
 }
 
 void Application::handleMouseMoved(double xpos, double ypos) {
   Vector2 mousePos = windowToSceneCoordinates(xpos, ypos);
 
+  // Check if we're scrolling the tree view
+  if (showTreeView_ && treeView_ && treeView_->isScrolling()) {
+    treeView_->updateScrollDrag(mousePos);
+    return;
+  }
+
   if (isDragging_ && draggedNode_) {
     // Calculate delta movement
     Vector2 delta = mousePos - lastMousePos_;
 
-    // Get current position and update it
-    Vector2 currentPos = draggedNode_->getPosition();
-    draggedNode_->setPosition(currentPos + delta);
+    // Calculate new position
+    Vector2 newPos = draggedNode_->getPosition() + delta;
+
+    // Check if the new position would move the car under the tree view
+    bool isTreeViewArea = false;
+    float treeViewWidth = constants::TREE_VIEW_WIDTH;
+
+    if (showTreeView_) {
+      if (newPos.x < -constants::SCENE_HALF_WIDTH + treeViewWidth) {
+        // Prevent horizontal movement into tree view area
+        newPos.x = -constants::SCENE_HALF_WIDTH + treeViewWidth;
+        // Only apply the vertical component of movement
+        delta.x = newPos.x - draggedNode_->getPosition().x;
+      }
+    }
+
+    // Apply the adjusted position
+    draggedNode_->setPosition(newPos);
 
     // Check if we're dealing with a car or car body
     bool isTopLevelCar =
@@ -286,6 +327,11 @@ void Application::handleMouseButton(int button, int action, int mods) {
         }
       }
     } else if (action == GLFW_RELEASE) {
+      // End scrolling if active
+      if (treeView_ && treeView_->isScrolling()) {
+        treeView_->endScrollDrag();
+      }
+
       // Stop dragging
       isDragging_ = false;
       draggedNode_ = nullptr;

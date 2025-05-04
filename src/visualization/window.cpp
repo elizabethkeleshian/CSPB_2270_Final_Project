@@ -62,6 +62,27 @@ bool Window::create(int width, int height, const std::string &title) {
         }
       });
 
+  // mouse button callback TODO: create separate function for this
+  glfwSetMouseButtonCallback(
+      static_cast<GLFWwindow *>(windowHandle_),
+      [](GLFWwindow *window, int button, int action, int mods) {
+        auto *thisWindow =
+            static_cast<Window *>(glfwGetWindowUserPointer(window));
+        if (thisWindow && thisWindow->mouseButtonCallback_) {
+          thisWindow->mouseButtonCallback_(button, action, mods);
+        }
+      });
+
+  // scroll callback TODO: create separate function for this
+  glfwSetScrollCallback(static_cast<GLFWwindow *>(windowHandle_),
+                        [](GLFWwindow *window, double xoffset, double yoffset) {
+                          auto *thisWindow = static_cast<Window *>(
+                              glfwGetWindowUserPointer(window));
+                          if (thisWindow && thisWindow->scrollCallback_) {
+                            thisWindow->scrollCallback_(xoffset, yoffset);
+                          }
+                        });
+
   return true;
 }
 
@@ -70,6 +91,10 @@ void Window::close() {
     glfwDestroyWindow(static_cast<GLFWwindow *>(windowHandle_));
     windowHandle_ = nullptr;
   }
+
+  // Only terminate GLFW if no other windows exist
+  // (in a real app, might need a ref counter)
+  glfwTerminate();
 }
 
 bool Window::shouldClose() const {
@@ -96,25 +121,16 @@ void Window::setKeyCallback(KeyCallback callback) {
   keyCallback_ = std::move(callback);
 }
 
+void Window::setMouseButtonCallback(MouseButtonCallback callback) {
+  mouseButtonCallback_ = std::move(callback);
+}
+
+void Window::setScrollCallback(ScrollCallback callback) {
+  scrollCallback_ = std::move(callback);
+}
+
 int Window::getWidth() const { return width_; }
 
 int Window::getHeight() const { return height_; }
-
-void Window::setMouseButtonCallback(MouseButtonCallback callback) {
-  mouseButtonCallback_ = std::move(callback);
-
-  // Set up the GLFW callback if we have a window
-  if (windowHandle_) {
-    glfwSetMouseButtonCallback(
-        static_cast<GLFWwindow *>(windowHandle_),
-        [](GLFWwindow *window, int button, int action, int mods) {
-          auto *thisWindow =
-              static_cast<Window *>(glfwGetWindowUserPointer(window));
-          if (thisWindow && thisWindow->mouseButtonCallback_) {
-            thisWindow->mouseButtonCallback_(button, action, mods);
-          }
-        });
-  }
-}
 
 } // namespace visualization

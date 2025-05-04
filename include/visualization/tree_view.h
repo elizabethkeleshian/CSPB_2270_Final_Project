@@ -47,6 +47,9 @@ public:
   void updateScrollDrag(const Vector2 &position);
   void endScrollDrag();
 
+  // Check if we're currently scrolling
+  [[nodiscard]] bool isScrolling() const { return isScrolling_; }
+
 private:
   // helper to render node and its children
   void renderNode(const std::shared_ptr<scene_graph::Node> &node, int depth,

@@ -10,6 +10,8 @@ class Window {
 public:
   using MouseCallback = std::function<void(double, double)>;
   using KeyCallback = std::function<void(int, int, int, int)>;
+  using MouseButtonCallback = std::function<void(int, int, int)>;
+  using ScrollCallback = std::function<void(double, double)>;
 
   Window();
   ~Window();
@@ -32,14 +34,12 @@ public:
   // Input callbacks
   void setMouseCallback(MouseCallback callback);
   void setKeyCallback(KeyCallback callback);
+  void setMouseButtonCallback(MouseButtonCallback callback);
+  void setScrollCallback(ScrollCallback callback);
 
   // Getters
   [[nodiscard]] int getWidth() const;
   [[nodiscard]] int getHeight() const;
-
-  using MouseButtonCallback = std::function<void(int, int, int)>;
-  void setMouseButtonCallback(MouseButtonCallback callback);
-  MouseButtonCallback mouseButtonCallback_;
   void *getWindowHandle() const { return windowHandle_; }
 
 private:
@@ -48,6 +48,8 @@ private:
   int height_;
   MouseCallback mouseCallback_;
   KeyCallback keyCallback_;
+  MouseButtonCallback mouseButtonCallback_;
+  ScrollCallback scrollCallback_;
 };
 
 } // namespace visualization
