@@ -197,7 +197,8 @@ The car example demonstrates the power of parent-child relationships in a scene 
 *Main application showing two cars with hierarchical components*
 
 ### Dragging a Car & Selecting Objects
-<video src="media/cars_moving.mov" width="320" height="240" controls></video>
+[![Video Title](https://img.youtube.com/vi/c6Qp_24x-Sg/0.jpg)](https://www.youtube.com/watch?v=c6Qp_24x-Sg)
+
 
 ## Implementation Details
 
