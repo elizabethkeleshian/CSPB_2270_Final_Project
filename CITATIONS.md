@@ -50,3 +50,25 @@ The AI assistance was used in accordance with the following principles:
 - AI-assisted code review and suggestions
 - AI-powered documentation assistance
 - C++ linters and static analyzers 
+
+## Academic and Technical References
+
+1. Sedgewick, R., & Wayne, K. (2011). Algorithms (4th ed.). Addison-Wesley Professional.
+   - Used for tree-based data structure implementation fundamentals
+   - Reference for efficient traversal algorithms
+
+2. Real-Time Rendering (4th Edition) by Akenine-Möller, Haines, and Hoffman
+   - Implementation guidance for transformation matrices and scene graph concepts
+   - Reference for graphics rendering techniques and optimization
+
+3. OpenGL Documentation
+   - Technical reference for rendering pipeline implementation
+   - Guidance on shader programming and graphics primitives
+
+4. Effective Modern C++ by Scott Meyers
+   - Best practices for shared_ptr and memory management
+   - Guidance on using move semantics and RAII
+
+5. Game Engine Architecture by Jason Gregory
+   - Reference for scene graph design patterns
+   - Implementation strategies for transformation hierarchies 

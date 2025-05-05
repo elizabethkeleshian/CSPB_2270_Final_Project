@@ -21,7 +21,7 @@ This project implements a hierarchical scene graph data structure for managing 2
 - [Development Workflow](#development-workflow)
 - [Troubleshooting](#troubleshooting)
 - [Implementation Components](#implementation-components)
-- [References](#references)
+- [Citations](#citations)
 
 ## What Are Scene Graphs?
 
@@ -579,8 +579,6 @@ This will create a `site` directory containing the static documentation files.
 - **Runtime Errors**: The application logs errors to stderr; check for these messages
 - **Compiler Errors**: If using older compilers, check that C++17 features are supported
 
-## References
+## Citations
 
-- Sedgewick, R., & Wayne, K. (2011). Algorithms (4th ed.). Addison-Wesley Professional.
-- Real-Time Rendering (4th Edition) by Akenine-Möller, Haines, and Hoffman
-- OpenGL documentation
+For a complete list of academic sources, references, and AI assistance used in this project, please see the [CITATIONS.md](CITATIONS.md) file.
