@@ -18,10 +18,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find required packages
 find_package(OpenGL REQUIRED)
 
-# Set explicit paths for GLEW
-set(GLEW_INCLUDE_DIR "/usr/local/include")
-set(GLEW_LIBRARY "/usr/local/lib/libGLEW.dylib")
-set(GLEW_LIBRARIES ${GLEW_LIBRARY})
+# Platform-specific GLEW setup
+if(APPLE)
+    # macOS specific paths
+    set(GLEW_INCLUDE_DIR "/usr/local/include")
+    set(GLEW_LIBRARY "/usr/local/lib/libGLEW.dylib")
+else()
+    # Linux (Ubuntu) specific paths
+    find_package(GLEW REQUIRED)
+    set(GLEW_INCLUDE_DIR ${GLEW_INCLUDE_DIRS})
+    set(GLEW_LIBRARY ${GLEW_LIBRARIES})
+endif()
 
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)

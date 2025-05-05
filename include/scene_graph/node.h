@@ -2,6 +2,7 @@
 #define SCENE_GRAPH_NODE_H
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "scene_graph/transform.h"

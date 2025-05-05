@@ -1,5 +1,6 @@
 #include "visualization/canvas.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include "scene_graph/node.h"
@@ -35,7 +36,7 @@ void Canvas::addShape(const std::shared_ptr<scene_graph::Shape>& shape) {
 }
 
 void Canvas::removeShape(const std::shared_ptr<scene_graph::Shape>& shape) {
-    shapes_.erase(remove(shapes_.begin(), shapes_.end(), shape), shapes_.end());
+    shapes_.erase(std::remove(shapes_.begin(), shapes_.end(), shape), shapes_.end());
 }
 
 void Canvas::clear() {
